@@ -1,0 +1,40 @@
+{% extends 'Admin/menu/sidebar.html.twig' %}
+
+{% block list %}
+    {% if not item.hasChildren %}
+        {%- if item.uri is not empty and (not matcher.isCurrent(item) or options.currentAsLink) %}
+            {{ block('linkElement') }}
+        {%- else %}
+            {{ block('spanElement') }}
+        {%- endif %}
+    {% else %}
+        {# render the list of children #}
+        {%- set childrenClasses = item.childrenAttribute('class') is not empty ? [item.childrenAttribute('class')] : [] %}
+        {%- set listAttributes = item.childrenAttributes|merge({'class': childrenClasses|join(' ') }) %}
+    {% endif %}
+
+    {% if item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
+        {% if item.level == 1 %}
+            <div class="sidebar-title">
+                <h3>{{ block('label') }}</h3>
+            </div>
+        {% elseif item.level > 1 %}
+            <div class="collapse-wrap">
+                {%- if item.uri is not empty and (not matcher.isCurrent(item) or options.currentAsLink) %}
+                    {{ block('linkElement') }}
+                {%- else %}
+                    {{ block('spanElement') }}
+                {%- endif %}
+            </div>
+        {% endif %}
+        {% import _self as knp_menu %}
+        {%- set attributes = listAttributes %}
+        {%- set attributesClasses = (attributes.class is defined and attributes.class is not empty) ? [attributes.class] : [] %}
+
+        {%- set attributes = listAttributes|merge({'class': attributesClasses|join(' ') }) %}
+
+        <ul{{ knp_menu.attributes(attributes) }}>
+            {{ block('children') }}
+        </ul>
+    {% endif %}
+{% endblock %}

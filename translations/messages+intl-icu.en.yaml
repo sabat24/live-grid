@@ -1,0 +1,19 @@
+drako:
+    ui:
+        results_per_page: >-
+            {resultsPerPage, plural,
+                =0    {}
+                one   {#&nbsp;result per page}
+                other {#&nbsp;results per page}
+            }
+auth:
+  page_title: Log In!
+  welcome_back: Welcome back.
+  sign_in_into_account: Please sign in into your account
+  i_do_not_have_account: I do not have an account yet
+  remember_me: Remember Me
+  sign_in: Sign In
+  forgot_password: Forgot Password?
+  form:
+    password_placeholder: Password
+    username_placeholder: Username

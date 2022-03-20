@@ -1,0 +1,22 @@
+drako:
+    ui:
+        actions: Akcje
+        cancel: Anuluj
+        create: Utwórz
+        edit: Edytuj
+        edit_user_details: Edytuj dane użytkownika
+        error: Błąd
+        label_next: Następna
+        label_previous: Poprzednia
+        new: Nowy
+        show: Pokaż
+        remove: Usuń
+        remove_from_list: Usuń z listy
+        this_form_contains_errors: Ten formularz zawiera błędy
+        view: Zobacz
+        view_user_details: Zobacz szczegóły użytkownika
+
+app:
+    ui:
+        new_user: Nowy użytkownik
+        users: Użytkownicy

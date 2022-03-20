@@ -1,0 +1,17 @@
+live_component_admin:
+    path: /admin/_components/{_live_component}/{_live_action}
+    defaults:
+        _live_action: 'get'
+
+app_admin_user:
+    resource: |
+        alias: app.user
+        section: admin
+        templates: Admin/Crud
+        filterable: false
+        vars:
+            all:
+                subheader: bookshop.ui.callout
+    type: sylius.resource
+    prefix: /admin
+

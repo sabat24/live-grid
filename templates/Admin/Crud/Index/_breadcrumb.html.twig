@@ -1,0 +1,5 @@
+{% import 'UiBundle/Macro/breadcrumb.html.twig' as breadcrumb %}
+
+{% set breadcrumbs = knp_menu_get_breadcrumbs_array(knp_menu_get_current_item('admin_sidebar')) %}
+
+{{ breadcrumb.crumble(breadcrumbs) }}

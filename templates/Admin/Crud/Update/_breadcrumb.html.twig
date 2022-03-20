@@ -1,0 +1,10 @@
+{% import 'UiBundle/Macro/breadcrumb.html.twig' as breadcrumb %}
+
+{% set breadcrumbs = knp_menu_get_breadcrumbs_array(knp_menu_get_current_item('admin_sidebar')) %}
+
+{% set breadcrumbs = breadcrumbs|merge([
+    { label: resource.name|default(resource.code|default(resource.id)) },
+    { label: 'drako.ui.edit'|trans }
+]) %}
+
+{{ breadcrumb.crumble(breadcrumbs) }}

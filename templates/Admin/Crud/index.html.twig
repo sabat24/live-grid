@@ -1,0 +1,33 @@
+{% extends 'Admin/default.html.twig' %}
+
+{% set header = configuration.vars.header|default(metadata.applicationName~'.ui.'~metadata.pluralName) %}
+
+{% block title %}{{ header|trans }} {{ parent() }}{% endblock %}
+
+{% block menu_title %}{{ header|trans }}{% endblock %}
+
+{% block page_content %}
+    {% include configuration.vars.templates.breadcrumb|default('Admin/Crud/Index/_breadcrumb.html.twig') %}
+    {#{% include configuration.vars.templates.header_title|default('Admin/Crud/Index/_headerTitle.html.twig') %}#}
+
+    <div class="columns">
+        <div class="column is-12">
+            <!--Flex Table-->
+            <div class="demo-card has-more-margin">
+                <div class="demo-title">
+                    <h3 class="title is-thin is-5">Advanced Table </h3>
+                    <p>Huro provides a custom table component called flex table. It looks like a table but
+                        is not a Html5 table. Instead, it uses the flexbox technology and is fully
+                        responsive. The below example, adds more controls and a wrapper to the table. Check
+                        the markup for more details.
+                    </p>
+                </div>
+            </div>
+
+            {{ component('admin:user_list') }}
+
+            {{ component('admin:user_list') }}
+
+        </div>
+    </div>
+{% endblock %}

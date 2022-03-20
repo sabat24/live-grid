@@ -1,0 +1,52 @@
+{% extends 'Admin/menu/sidebar.html.twig' %}
+
+{% block list %}
+    {% if not item.hasChildren %}
+        {%- if item.uri is not empty and (not matcher.isCurrent(item) or options.currentAsLink) %}
+            {{ block('linkElement') }}
+        {%- else %}
+            {{ block('spanElement') }}
+        {%- endif %}
+    {% else %}
+        {# render the list of children #}
+        {%- set childrenClasses = item.childrenAttribute('class') is not empty ? [item.childrenAttribute('class')] : [] %}
+        {%- set listAttributes = item.childrenAttributes|merge({'class': childrenClasses|join(' ') }) %}
+    {% endif %}
+
+    {% if item.hasChildren and item.displayChildren %}
+        {% if item.level > 0 %}
+            <div class="collapse-wrap">
+                {%- if item.uri is not empty and (not matcher.isCurrent(item) or options.currentAsLink) %}
+                    {{ block('linkElement') }}
+                {%- else %}
+                    {{ block('spanElement') }}
+                {%- endif %}
+            </div>
+        {% endif %}
+        {% if options.depth is not same as(0) %}
+            {% import _self as knp_menu %}
+            {%- set attributes = listAttributes %}
+            {%- set attributesClasses = attributes.class is defined ? [attributes.class] : [] %}
+            {%- set attributes = listAttributes|merge({'class': attributesClasses|join(' ') }) %}
+            <ul{{ knp_menu.attributes(attributes) }}>
+                {{ block('children') }}
+            </ul>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block linkElement %}
+    {% import _self as knp_menu %}
+    {%- set itemClasses = item.linkAttribute('class') is not empty ? [item.linkAttribute('class')] : [] %}
+    {% if item.getExtra('label') %}
+        {%- set itemClasses = itemClasses|merge(['labelled']) %}
+    {% endif %}
+
+    {%- set itemAttributes = item.linkAttributes|merge({'class': itemClasses|join(' ') }) %}
+
+    <a href="{{ item.uri }}"{{ knp_menu.attributes(itemAttributes) }}>
+        {% if item.getExtra('icon') %}
+            <i data-feather="{{ item.getExtra('icon') }}"></i>
+        {% endif %}
+    </a>
+{% endblock %}

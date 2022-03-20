@@ -1,0 +1,7 @@
+sylius_grid:
+    templates:
+        action:
+            create: "UiBundle/Grid/Action/create.html.twig"
+            show: "UiBundle/Grid/Action/show.html.twig"
+            update: "UiBundle/Grid/Action/update.html.twig"
+            delete: "UiBundle/Grid/Action/delete.html.twig"

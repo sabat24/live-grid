@@ -1,0 +1,26 @@
+{% macro default(url, message, id, icon, class) %}
+    <a class="button h-button {% if class is not empty %} {{ class }} {% endif %}" {% if id is not null %} id="{{ id }}"{% endif %} href="{{ url }}">
+        {% if icon is not empty %}
+            <span class="icon">
+                <i class="fas {{ icon }}"></i>
+            </span>
+        {% endif %}
+        {% if message is not empty %}
+            <span>{{ message|trans }}</span>
+        {% endif %}
+    </a>
+{% endmacro %}
+
+{% macro create(url, message, id, labeled = true, class) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.create' %}
+    {% endif %}
+
+    {% set class = class|default('') ~ ' is-primary is-raised' %}
+
+    {{ buttons.default(url, message, id, 'fa-plus', class) }}
+{% endmacro %}
+
+

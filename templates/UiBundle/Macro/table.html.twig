@@ -1,0 +1,70 @@
+{% macro headers(grid, definition, requestAttributes) %}
+    {% import 'UiBundle/Macro/sorting.html.twig' as sorting %}
+
+    {% if definition.actionGroups.bulk is defined and definition.getEnabledActions('bulk')|length > 0 %}
+        <span class="is-checkbox">
+            <label class="checkbox"><input type="checkbox"/><span></span></label>
+        </span>
+    {% endif %}
+
+    {% for field in definition.fields|sort_by('position') %}
+        {% if field.enabled %}
+            {% if field.isSortable %}
+                {{ sorting.tableHeader(grid, field, requestAttributes) }}
+            {% else %}
+                <span class="sylius-table-column-{{ field.name }} is-grow">
+                    {{ field.label|trans }}
+                </span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if definition.actionGroups.item is defined and definition.getEnabledActions('item')|length > 0 %}
+        <span class="cell-end">{{ 'drako.ui.actions'|trans }}</span>
+    {% endif %}
+{% endmacro %}
+
+{% macro row(grid, definition, row) %}
+    <div class="flex-table-item">
+        {% if definition.actionGroups.bulk is defined and definition.getEnabledActions('bulk')|length > 0 %}
+            <div class="flex-table-cell is-checkbox">
+                <label class="checkbox">
+                    <input class="bulk-select-checkbox" type="checkbox" value="{{ row.id }}"/>
+                    <span></span>
+                </label>
+            </div>
+        {% endif %}
+        {% for field in definition.enabledFields|sort_by('position') %}
+            <div class="flex-table-cell is-media is-grow" data-th="">
+                {{ sylius_grid_render_field(grid, field, row) }}
+            </div>
+        {% endfor %}
+        {% if definition.actionGroups.item is defined and definition.getEnabledActions('item')|length > 0 %}
+            <div class="flex-table-cell cell-end" data-th="Actions">
+                <div class="dropdown is-spaced is-dots is-right dropdown-trigger is-pushed-mobile">
+                    <div class="is-trigger" aria-haspopup="true">
+                        <i data-feather="more-vertical"></i>
+                    </div>
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content">
+                             {% for action in definition.getEnabledActions('item')|sort_by('position') %}
+                                {{ sylius_grid_render_action(grid, action, row) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# <td>
+
+            {% if definition.actionGroups.subitem is defined and definition.getEnabledActions('subitem')|length > 0 %}
+                <div class="ui divider"></div>
+                <div class="ui buttons">
+            #}{# {% for action in definition.getEnabledActions('subitem')|sort_by('position') %} #}{#
+            {{ sylius_grid_render_action(grid, action, row) }}
+        {% endfor %}
+    </div>
+{% endif %}
+</td> #}
+        {% endif %}
+    </div>
+{% endmacro %}

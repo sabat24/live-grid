@@ -1,0 +1,21 @@
+<div class="control is-inline-block-tablet">
+    <div class="h-select is-rounded">
+        <div class="select-box">
+            <span>{{ 'drako.ui.results_per_page'|trans({resultsPerPage: resultsPerPage})|raw }}</span>
+        </div>
+        <div class="select-icon">
+            <i data-feather="chevron-down"></i>
+        </div>
+        <div class="select-drop has-slimscroll-sm">
+            <div class="drop-inner">
+                {% for item in this.resultsPerPageChoices %}
+                    <div class="option-row">
+                        <div class="option-meta">
+                            <span data-action="click->live#action" data-action-name="updateResultsPerPage(resultsPerPage={{ item }})">{{ 'drako.ui.results_per_page'|trans({resultsPerPage: item})|raw }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

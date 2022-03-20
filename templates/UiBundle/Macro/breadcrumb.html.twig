@@ -1,0 +1,27 @@
+{% macro crumble(crumbs = {}, root_path, root_label) %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            {% for crumb in crumbs %}
+                <li>
+                    {% if crumb.uri is defined and crumb.uri is null %}
+                        <a href="{{ root_path|default('/') }}">
+                            <span class="icon is-small is-solo">
+                                <i data-feather="home"></i>
+                            </span>
+                        </a>
+                    {% elseif crumb.uri is not defined %}
+                        <span>{{ crumb.label }}</span>
+                    {% else %}
+                        <a href="{{ crumb.uri }}" title="{{ crumb.label }}">
+                            <span>{{ crumb.label }}</span>
+                        </a>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ root_path|default('/') }}" class="section">{{ root_label|default('drako.ui.root'|trans) }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+{% endmacro %}

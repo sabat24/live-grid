@@ -1,0 +1,39 @@
+sylius_grid:
+    grids:
+        app_admin_user:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: "%app.model.user.class%"
+            fields:
+                email:
+                    type: twig
+                    path: .
+                    options:
+                        template: 'Admin/Grid/Field/User/fullNameAndRole.html.twig'
+                username:
+                    type: string
+                    path: username
+            actions:
+                main:
+                    create:
+                        type: create
+                item:
+                    # show:
+                        # type: show
+                        # label: drako.ui.view
+                        # options:
+                            # label_description: drako.ui.view_user_details
+                    update:
+                        type: update
+                        label: drako.ui.edit
+                        options:
+                            label_description: drako.ui.edit_user_details
+                    delete:
+                        type: delete
+                        label: drako.ui.remove
+                        options:
+                            label_description: drako.ui.remove_from_list
+                bulk:
+                    delete:
+                        type: delete
