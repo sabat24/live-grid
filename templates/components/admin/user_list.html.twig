@@ -1,0 +1,53 @@
+{% import 'UiBundle/Macro/table.html.twig' as table %}
+{% import 'UiBundle/Grid/Action/create.html.twig' as buttons %}
+
+{% form_theme form 'UiBundle/Form/gridSearchFormTheme.html.twig' %}
+
+{% set definition = this.grid.definition %}
+{% set data = this.grid.data %}
+
+<div {{ attributes.add(stimulus_controller('queryable content')) }}>
+    <div class="flex-table-wrapper">
+        <div class="columns flex-table-filter-bar">
+            <div class="column is-four-fifths left">
+                <hr class="dropdown-divider is-hidden-tablet" />
+                {{ form_start(form, {
+                    attr: {
+                        'data-action': 'live#action',
+                        'data-action-name': 'prevent|search',
+                    }
+                }) }}
+
+                {{ form_end(form) }}
+            </div>
+
+            <div class="column right">
+                {% if definition.actionGroups.main is defined %}
+                    {% for action in definition.getEnabledActions('main') %}
+                        {{ sylius_grid_render_action(this.grid, action, null) }}
+                    {% endfor %}
+                {% endif %}
+                {{ component('admin:results_per_page_select', {resultsPerPage: resultsPerPage, resultsPerPageChoices: this.allowedPaginate}) }}
+            </div>
+        </div>
+
+        <div data-loading="addClass(has-loader-active)" class="advanced-flex-table flex-table has-loader">
+            <!--Loader element-->
+            <div class="h-loader-wrapper">
+                <div class="loader is-large is-loading"></div>
+            </div>
+
+            <!--Table header-->
+            <div class="flex-table-header">
+                {{ table.headers(this.grid, definition, app.request.attributes) }}
+            </div>
+
+            <!--Table item-->
+            {% for row in this.resources %}
+                {{ table.row(this.grid, definition, row) }}
+            {% endfor %}
+        </div>
+    </div>
+
+    {{ component('admin:sliding_pagination', { page: page, totalItemCount: this.resourcesCount, resultsPerPage: resultsPerPage}) }}
+</div>

@@ -1,0 +1,31 @@
+drako:
+    ui:
+        actions: Actions
+        cancel: Cancel
+        create: Create
+        edit: Edit
+        edit_user_details: Edit user details
+        error: Error
+        label_next: Next
+        label_previous: Previous
+        new: New
+        save_changes: Save changes
+        show: Show
+        remove: Remove
+        remove_from_list: Remove from list
+        this_form_contains_errors: This form contains errors
+        view: View
+        view_user_details: View user details
+
+app:
+    form:
+        user:
+            username: Username
+            email: Email
+            password.label: Password
+            verified: Verified
+            roles: Roles
+    ui:
+        new_user: New user
+        users: Users
+        edit_user: Edit user

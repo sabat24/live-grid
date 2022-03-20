@@ -1,0 +1,42 @@
+{% form_theme form 'UiBundle/Form/huroTheme.html.twig' %}
+
+<div {{ attributes.add(stimulus_controller('form')) }}>
+    {% set method = resource is null ? 'POST' : 'PUT' %}
+
+    {{ form_start(form, {'action': action, 'method': method}) }}
+    <div class="form-header stuck-header">
+        <div class="form-header-inner">
+            <div class="left">
+                <h3>{{ header|trans }}</h3>
+            </div>
+            <div class="right">
+                {% if resource is null %}
+                    {% include 'UiBundle/Form/Buttons/_create.html.twig' with {'paths': {'cancel': backUrl}} %}
+                {% else %}
+                    {% include 'UiBundle/Form/Buttons/_update.html.twig' with {'paths': {'cancel': backUrl}} %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="form-body">
+        <div class="fieldset">
+            {% if showErrorMessage %}
+                {% include 'Admin/Crud/form_validation_errors_checker.html.twig' %}
+            {% endif %}
+
+            {{ form_widget(form) }}
+
+        </div>
+        <div class="fieldset-separator"></div>
+        <div class="fieldset">
+            <div class="buttons is-right">
+                {% if resource is null %}
+                    {% include 'UiBundle/Form/Buttons/_create_simple.html.twig' %}
+                {% else %}
+                    {% include 'UiBundle/Form/Buttons/_update_simple.html.twig' %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {{ form_end(form, {'render_rest': false}) }}
+</div>

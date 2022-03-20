@@ -1,0 +1,5 @@
+{% import 'UiBundle/Macro/action_list_items.html.twig' as items %}
+
+{% set path = options.link.url|default(path(options.link.route|default(grid.requestConfiguration.getRouteName('update')), options.link.parameters|default({'id': data.id}))) %}
+
+{{ items.edit(path, action.label, action.options.label_description|default(null)) }}

@@ -1,0 +1,21 @@
+{% macro default(header, icon, subheader) %}
+    <div class="personal-dashboard personal-dashboard-v1">
+        <div class="dashboard-header">
+            {% if icon is not empty %}
+                <i class="circular {{ icon }} icon"></i>
+            {% endif %}
+            {% if image_path is defined %}
+                <div class="h-avatar is-large">
+                    <img class="avatar" src="{{ image_path }}" data-demo-src="{{ image_path }}" alt=""/>
+                </div>
+            {% endif %}
+            <div class="start">
+                <h3>{{ header }}</h3>
+                {% if subheader is not empty %}
+                    <p>{{ subheader }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+{% endmacro %}

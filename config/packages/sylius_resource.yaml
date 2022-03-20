@@ -1,0 +1,16 @@
+imports:
+    - { resource: "grids/user.yaml" }
+
+# @see https://github.com/Sylius/SyliusResourceBundle/blob/master/docs/index.md
+sylius_resource:
+    # Override default settings
+    settings:
+        allowed_paginate: [10, 25, 50]
+
+    # Configure your resources
+    resources:
+        app.user:
+            classes:
+                model: App\Component\User\Entity\User
+                form: App\Component\User\Form\Type\UserType
+

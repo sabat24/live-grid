@@ -1,0 +1,82 @@
+{% use "form_div_layout.html.twig" %}
+
+{% block form_widget_simple -%}
+    <div class="control{% if icon is defined and icon != '' %} has-icon{% endif %} {% if errors|length %} has-validation has-error{% endif %}">
+        {%- if type is not defined or type != 'hidden' %}
+            {%- set widget_class = ' input' %}
+            {%- if type|default('') == 'color' -%}
+                {%- set widget_class = widget_class ~ ' form-control-color' -%}
+            {%- elseif type|default('') == 'range' -%}
+                {%- set widget_class = ' form-range' -%}
+            {%- endif -%}
+            {%- set attr = attr|merge({class: (attr.class|default('') ~ widget_class)|trim}) -%}
+            {%- if label != false and attr.placeholder is not defined -%}
+                {%- set attr = attr|merge({placeholder: label}) -%}
+            {%- endif -%}
+        {% endif -%}
+        {%- if type is defined and type in ['range', 'color'] %}
+            {# Attribute "required" is not supported #}
+            {% set required = false %}
+        {% endif -%}
+        {{- parent() -}}
+        {% if icon is defined and icon != '' %}
+            <div class="form-icon">
+                <i data-feather="{{ icon }}"></i>
+            </div>
+        {% endif %}
+        {% if errors|length %}
+            <div class="validation-icon is-error">
+                <i data-feather="x"></i>
+            </div>
+        {% endif %}
+
+    </div>
+{%- endblock form_widget_simple %}
+
+{%- block form_row -%}
+    {%- if compound is defined and compound -%}
+        {%- set element = 'fieldset' -%}
+    {%- endif -%}
+    {%- set widget_attr = {} -%}
+    {%- if help is not empty -%}
+        {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%}
+    {%- endif -%}
+    {%- set widget_attr = widget_attr|merge({attr: {'data-live-ignore': 1}}) %}
+    {%- set row_class = row_class|default(row_attr.class|default('field')|trim) -%}
+    <{{ element|default('div') }}{% with {attr: row_attr|merge({class: row_class})} %}{{ block('attributes') }}{% endwith %}>
+    {%- if 'form-floating' in row_class -%}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_label(form) -}}
+    {%- else -%}
+        {{- form_label(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+    {%- endif -%}
+    {{- form_help(form) -}}
+    <div class="help danger-text">
+        {{- form_errors(form) -}}
+    </div>
+    </{{ element|default('div') }}>
+{%- endblock form_row %}
+
+{%- block choice_widget_collapsed -%}
+    <div class="control">
+        <div class="select is-fullwidth">
+            {{- parent() -}}
+        </div>
+    </div>
+{%- endblock choice_widget_collapsed %}
+
+{% block checkbox_row -%}
+    <div class="{% if required %}required {% endif %}switch-block{% if (not compound or force_error|default(false)) and not valid %} error{% endif %}">
+        <label class="form-switch">
+            {{- form_widget(form, {attr: {class: 'is-switch'}}) -}}
+            <i></i>
+            <div class="text">
+                <span>{{ field_label(form) }}</span>
+            </div>
+        </label>
+    </div>
+    {{- form_errors(form) -}}
+{%- endblock checkbox_row %}
+
+

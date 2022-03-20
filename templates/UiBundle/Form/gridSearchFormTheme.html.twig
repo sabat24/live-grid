@@ -1,0 +1,18 @@
+{% use "UiBundle/Form/huroTheme.html.twig" %}
+
+{% block filter_text_widget %}
+    {% if compound %}
+        <div class="filter-pattern-selector">
+            {{ form_widget(form.condition_pattern, {'attr': {'class': 'pattern-selector'} }) }}
+            {{ form_widget(form.text, {'attr': attr}) }}
+        </div>
+    {% else %}
+        {% set icon = 'search' %}
+        {{ block('form_widget_simple') }}
+    {% endif %}
+{% endblock filter_text_widget %}
+
+{%- block form_row -%}
+    {% set row_attr = row_attr|merge({class: 'field is-inline-block-tablet'}) %}
+    {{- parent() -}}
+{%- endblock -%}

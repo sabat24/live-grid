@@ -1,0 +1,28 @@
+{% macro default(message, type, header) %}
+    <div class="message {{ type|default('') }}">
+        <a class="delete"></a>
+        <div class="message-body">
+            {% if type is not empty %}
+            <div class="header">
+                {{ header|default(type)|trans }}
+            </div>
+            {% endif %}
+            <p>{{ message|trans }}</p>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro info(message) %}
+    {% import _self as messages %}
+    {{ messages.default(message, 'is-info', 'drako.ui.info') }}
+{% endmacro %}
+
+{% macro success(message) %}
+    {% import _self as messages %}
+    {{ messages.default(message, 'is-success', 'drako.ui.success') }}
+{% endmacro %}
+
+{% macro error(message) %}
+    {% import _self as messages %}
+    {{ messages.default(message, 'is-danger', 'drako.ui.error') }}
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% extends 'Admin/default.html.twig' %}
+
+{% set header = configuration.vars.header|default(metadata.applicationName~'.ui.edit_'~metadata.name) %}
+
+{% block title %}{{ header|trans }} {{ parent() }}{% endblock %}
+
+{% block menu_title %}{{ header|trans }}{% endblock %}
+
+{% form_theme form 'UiBundle/Form/huroTheme.html.twig' %}
+
+{% block page_content %}
+    {% include configuration.vars.templates.breadcrumb|default('Admin/Crud/Update/_breadcrumb.html.twig') %}
+    {% include configuration.vars.templates.toolbar|default('Admin/Crud/_toolbar.html.twig') ignore missing %}
+
+    {% set back_url = path(
+        configuration.vars.index.route.name|default(configuration.getRouteName('index')),
+        configuration.vars.index.route.parameters|default(configuration.vars.route.parameters|default({}))
+    ) %}
+
+    <div class="form-layout">
+        <div class="form-outer">
+            {{ component('admin:resource_form', {
+                resource: resource.id ? resource : null,
+                form: form,
+                action: path(configuration.getRouteName('update'), configuration.vars.route.parameters|default({ 'id': resource.id })),
+                backUrl: back_url,
+                header: header,
+                formType: metadata.parameters.classes.form,
+                resourceClass: metadata.parameters.classes.model
+            }) }}
+        </div>
+    </div>
+{% endblock %}
+
+

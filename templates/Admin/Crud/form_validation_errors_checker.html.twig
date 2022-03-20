@@ -1,0 +1,5 @@
+{% import 'UiBundle/Macro/messages.html.twig' as messages %}
+
+{% if form.vars.valid == false %}
+    {{ messages.error('drako.ui.this_form_contains_errors') }}
+{% endif %}

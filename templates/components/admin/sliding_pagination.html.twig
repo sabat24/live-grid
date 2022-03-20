@@ -1,0 +1,63 @@
+<div>
+    {% if viewData.pageCount > 1 %}
+        <nav class="flex-pagination pagination is-rounded"{% if containerAttributes is defined %} {% for attr, value  in containerAttributes %} {{ attr }}="{{ value }}"{% endfor %} {% endif %} >
+
+        {% if viewData.previous is not null %}
+            <span class="pagination-previous" data-action="click->live#action" data-action-name="updatePage(page={{ viewData.previous }})" rel="prev">&laquo;&nbsp;{{ 'drako.ui.label_previous'|trans }}</span>
+        {% else %}
+            <span class="pagination-previous" disabled="disabled">&laquo;&nbsp;{{ 'drako.ui.label_previous'|trans }}</span>
+        {% endif %}
+        {% if viewData.next is not null %}
+            <span class="pagination-next" data-action="click->live#action" data-action-name="updatePage(page={{ viewData.next }})" rel="next">{{ 'drako.ui.label_next'|trans }}&nbsp;&raquo;</span>
+        {% else %}
+            <span class="pagination-next" disabled="disabled">{{ 'drako.ui.label_next'|trans }}&nbsp;&raquo;</span>
+        {% endif %}
+
+        <ul class="pagination-list">
+            {% if viewData.startPage > 1 %}
+                <li>
+                    <span class="pagination-link" data-action="click->live#action" data-action-name="updatePage(page=1)">1</span>
+                </li>
+                {% if viewData.startPage == 3 %}
+                    <li>
+                        <span class="pagination-link" data-action="click->live#action" data-action-name="updatePage(page=2)">2</span>
+                    </li>
+                {% elseif viewData.startPage != 2 %}
+                    <li>
+                        <span class="pagination-ellipsis">&hellip;</span>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+            {% for page in viewData.pagesInRange %}
+                {% if page != viewData.current %}
+                    <li>
+                        <span data-action="click->live#action" data-action-name="updatePage(page={{ page }})" class="pagination-link">{{ page }}</span>
+                    </li>
+                {% else %}
+                    <li>
+                        <span class="pagination-link is-current">{{ page }}</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if viewData.pageCount > viewData.endPage %}
+                {% if viewData.pageCount > (viewData.endPage + 1) %}
+                    {% if viewData.pageCount > (viewData.endPage + 2) %}
+                        <li>
+                            <span class="pagination-ellipsis">&hellip;</span>
+                        </li>
+                    {% else %}
+                        <li>
+                            <span data-action="click->live#action" data-action-name="updatePage(page={{ viewData.pageCount - 1 }})" class="pagination-link">{{ viewData.pageCount -1 }}</span>
+                        </li>
+                    {% endif %}
+                {% endif %}
+                <li>
+                    <span data-action="click->live#action" data-action-name="updatePage(page={{ viewData.pageCount }})" class="pagination-link">{{ viewData.pageCount }}</span>
+                </li>
+            {% endif %}
+        </ul>
+        </nav>
+    {% endif %}
+</div>

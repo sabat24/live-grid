@@ -1,0 +1,57 @@
+{% macro default(url, message, description, id, icon, class) %}
+    <a class="dropdown-item {% if message is not empty %}labeled {% endif %}{% if icon is not empty %}is-media {% endif %} {% if class is not empty %} {{ class }} {% endif %}" {% if id is not null %} id="{{ id }}"{% endif %} href="{{ url }}">
+        {% if icon is not empty %}
+            <div class="icon">
+                <i class="lnil {{ icon }}"></i>
+            </div>
+        {% endif %}
+        {% if message is not empty %}
+            <div class="meta">
+                <span>{{ message|trans }}</span>
+                {% if description is not empty %}
+                    <span>{{ description|trans }}</span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </a>
+{% endmacro %}
+
+{% macro show(url, message, description, id, class, labeled = true) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.show' %}
+    {% endif %}
+
+    {{ buttons.default(url, message, description, id, 'lnil-eye') }}
+{% endmacro %}
+
+{% macro create(url, message, description, id, labeled = true) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.create' %}
+    {% endif %}
+
+    {{ buttons.default(url, message, description, id, 'plus', 'primary') }}
+{% endmacro %}
+
+{% macro edit(url, message, description, id, labeled = true) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.edit' %}
+    {% endif %}
+
+    {{ buttons.default(url, message, description, id, 'lnil-pencil') }}
+{% endmacro %}
+
+{% macro delete(url, message, description, id, labeled = true, resourceId = null) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.remove' %}
+    {% endif %}
+
+    {{ buttons.default(url, message, description, id, 'lnil-trash-can-alt') }}
+{% endmacro %}
