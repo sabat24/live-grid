@@ -5,9 +5,9 @@ namespace App\Component\Grid\Ux;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
@@ -21,7 +21,7 @@ final class ResourceFormComponent extends AbstractController
     use ComponentWithFormTrait;
 
     public function __construct(
-        private readonly NormalizerInterface | DenormalizerInterface $normalizer,
+        private readonly DenormalizerInterface $denormalizer,
     ) {
     }
 
@@ -46,17 +46,27 @@ final class ResourceFormComponent extends AbstractController
     #[LiveProp]
     public bool $showErrorMessage = true;
 
+    /**
+     * @return FormInterface<mixed>
+     */
     protected function instantiateForm(): FormInterface
     {
         $this->showErrorMessage = false;
 
-        return $this->createForm($this->formType, $this->resource);
+        if (!is_a($this->formType, FormTypeInterface::class, true)) {
+            throw new \InvalidArgumentException(sprintf('"%s" is not a valid form type class.', $this->formType));
+        }
+
+        /** @var class-string<FormTypeInterface<mixed>> $formType */
+        $formType = $this->formType;
+
+        return $this->createForm($formType, $this->resource);
     }
 
-    public function hydrate($value)
+    public function hydrate(mixed $value): ?ResourceInterface
     {
         try {
-            return $this->normalizer->denormalize(
+            $resource = $this->denormalizer->denormalize(
                 $value,
                 $this->resourceClass,
                 'json',
@@ -71,12 +81,21 @@ final class ResourceFormComponent extends AbstractController
                 $exception->getMessage(),
             );
 
-            // unless the data is gigantic, include it in the error to help
-            if (\strlen($json) < 1000) {
+            if ($json !== false && \strlen($json) < 1000) {
                 $message .= sprintf(' The data sent from the frontend was: %s', $json);
             }
 
             throw new \LogicException($message, 0, $exception);
         }
+
+        if ($resource !== null && !$resource instanceof ResourceInterface) {
+            throw new \UnexpectedValueException(sprintf(
+                'Denormalizer returned "%s" instead of "%s".',
+                get_debug_type($resource),
+                $this->resourceClass,
+            ));
+        }
+
+        return $resource;
     }
 }

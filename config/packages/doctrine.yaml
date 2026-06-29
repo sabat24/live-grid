@@ -29,7 +29,7 @@ when@test:
         orm:
             # "TEST_TOKEN" is typically set by ParaTest
             #dbname_suffix: '_test%env(default::TEST_TOKEN)%'
-            default_entity_manager: test
+            default_entity_manager: default
 
 when@prod:
     doctrine:

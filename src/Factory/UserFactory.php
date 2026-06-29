@@ -11,38 +11,31 @@ use Zenstruck\Foundry\RepositoryProxy;
 /**
  * @extends ModelFactory<User>
  *
- * @method        User|Proxy create(array|callable $attributes = [])
- * @method static User|Proxy createOne(array $attributes = [])
- * @method static User|Proxy find(object|array|mixed $criteria)
- * @method static User|Proxy findOrCreate(array $attributes)
- * @method static User|Proxy first(string $sortedField = 'id')
- * @method static User|Proxy last(string $sortedField = 'id')
- * @method static User|Proxy random(array $attributes = [])
- * @method static User|Proxy randomOrCreate(array $attributes = [])
- * @method static EntityRepository|RepositoryProxy repository()
- * @method static User[]|Proxy[] all()
- * @method static User[]|Proxy[] createMany(int $number, array|callable $attributes = [])
- * @method static User[]|Proxy[] createSequence(array|callable $sequence)
- * @method static User[]|Proxy[] findBy(array $attributes)
- * @method static User[]|Proxy[] randomRange(int $min, int $max, array $attributes = [])
- * @method static User[]|Proxy[] randomSet(int $number, array $attributes = [])
+ * @method User|Proxy<User> create(array<string, mixed>|callable $attributes = [])
+ * @method static User|Proxy<User> createOne(array<string, mixed> $attributes = [])
+ * @method static User|Proxy<User> find(object|array<string, mixed> $criteria)
+ * @method static User|Proxy<User> findOrCreate(array<string, mixed> $attributes)
+ * @method static User|Proxy<User> first(string $sortedField = 'id')
+ * @method static User|Proxy<User> last(string $sortedField = 'id')
+ * @method static User|Proxy<User> random(array<string, mixed> $attributes = [])
+ * @method static User|Proxy<User> randomOrCreate(array<string, mixed> $attributes = [])
+ * @method static EntityRepository|RepositoryProxy<User> repository()
+ * @method static list<User|Proxy<User>> all()
+ * @method static list<User|Proxy<User>> createMany(int $number, array<string, mixed>|callable $attributes = [])
+ * @method static list<User|Proxy<User>> createSequence(iterable<array<string, mixed>|callable> $sequence)
+ * @method static list<User|Proxy<User>> findBy(array<string, mixed> $attributes)
+ * @method static list<User|Proxy<User>> randomRange(int $min, int $max, array<string, mixed> $attributes = [])
+ * @method static list<User|Proxy<User>> randomSet(int $number, array<string, mixed> $attributes = [])
  */
 final class UserFactory extends ModelFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
     public function __construct()
     {
         parent::__construct();
     }
 
     /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
+     * @return array<string, mixed>
      */
     protected function getDefaults(): array
     {
@@ -54,14 +47,9 @@ final class UserFactory extends ModelFactory
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     protected function initialize(): self
     {
-        return $this
-            // ->afterInstantiate(function(User $user): void {})
-        ;
+        return $this;
     }
 
     protected static function getClass(): string

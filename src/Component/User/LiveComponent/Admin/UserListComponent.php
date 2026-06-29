@@ -5,16 +5,17 @@ namespace App\Component\User\LiveComponent\Admin;
 use App\Component\Grid\Model\GridComponentInterface;
 use App\Component\Grid\Service\GridLiveComponentService;
 use App\Component\LiveComponent\Attribute\QueryableProp;
+use App\Component\LiveComponent\Service\QueryableParamsBuilder;
 use App\Component\LiveComponent\Trait\QueryableComponentTrait;
 use App\Component\User\Entity\User;
 use App\Component\User\Form\FilterType\UserListFilterType;
 use App\Component\User\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Pagerfanta\Pagerfanta;
 use Sylius\Component\Grid\View\GridView;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -39,22 +40,32 @@ final class UserListComponent implements GridComponentInterface
     #[QueryableProp]
     public int $resultsPerPage = 10;
 
+    /** @var Pagerfanta<User> */
     private Pagerfanta $paginator;
 
     private const GRID_NAME = 'app_admin_user';
 
     public function __construct(
-        // todo resource repository interface
         private readonly UserRepository $userRepository,
         private readonly FormFactoryInterface $formFactory,
         private readonly RequestStack $requestStack,
-        private readonly EntityManagerInterface $entityManager,
         private readonly GridLiveComponentService $gridLiveComponentService,
+        QueryableParamsBuilder $queryableParamsBuilder,
     ) {
-        // see the trait for more info
         $this->generateUniqueComponentName = true;
+        $this->setQueryableParamsBuilder($queryableParamsBuilder);
     }
 
+    protected function getRequestStack(): RequestStack
+    {
+        return $this->requestStack;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     #[PostMount]
     public function onMountedEvent(array $data): array
     {
@@ -75,6 +86,9 @@ final class UserListComponent implements GridComponentInterface
         $this->updateQueryString();
     }
 
+    /**
+     * @return FormInterface<mixed>
+     */
     public function getSearchFormInstance(): FormInterface
     {
         return $this->getFormInstance();
@@ -99,7 +113,7 @@ final class UserListComponent implements GridComponentInterface
     }
 
     /**
-     * @return User[]
+     * @return iterable<int, User>
      */
     public function getResources(): iterable
     {
@@ -111,24 +125,51 @@ final class UserListComponent implements GridComponentInterface
         return $this->paginator->getNbResults();
     }
 
+    /**
+     * @return FormInterface<mixed>
+     */
     protected function instantiateForm(): FormInterface
     {
         return $this->formFactory->create(UserListFilterType::class);
     }
 
-    // we override that to not render component on field change; we need to submit form to run the search action
-    private function getDataModelValue(): ?string
+    // Overrides ComponentWithFormTrait::getDataModelValue() — prevents re-render on every field change.
+    private function getDataModelValue(): string
     {
         return 'norender|*';
     }
 
-    public function createFilterQueryBuilder(): QueryBuilder
+    /**
+     * @param array<mixed, mixed> $params
+     */
+    protected function applyQueryableFormParams(array $params): void
     {
-        return $this->entityManager
-            ->getRepository(User::class)
-            ->createQueryBuilder('u');
+        $form = $this->getFormInstance();
+        $formName = $form->getName();
+        if (isset($params[$formName]) && is_array($params[$formName])) {
+            $this->formValues = $params[$formName];
+            $this->submitForm();
+        }
     }
 
+    protected function resolveQueryableFormView(): FormView
+    {
+        return $this->getForm();
+    }
+
+    protected function resetQueryableFormView(): void
+    {
+        $this->formView = null;
+    }
+
+    public function createFilterQueryBuilder(): QueryBuilder
+    {
+        return $this->userRepository->createQueryBuilder('u');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfiguration(): array
     {
         return [
@@ -138,6 +179,9 @@ final class UserListComponent implements GridComponentInterface
         ];
     }
 
+    /**
+     * @return list<int>
+     */
     public function getAllowedPaginate(): array
     {
         return $this->gridLiveComponentService->getAllowedPaginate();

@@ -17,6 +17,10 @@ final class SortByExtension extends AbstractExtension
     }
 
     /**
+     * @param iterable<object|array<string, mixed>> $iterable
+     *
+     * @return list<object|array<string, mixed>>
+     *
      * @throws NoSuchPropertyException
      */
     public function sortBy(iterable $iterable, string $field, string $order = 'ASC'): array
@@ -25,11 +29,11 @@ final class SortByExtension extends AbstractExtension
 
         usort(
             $array,
-            function (mixed $firstElement, mixed $secondElement) use ($field, $order) {
+            function (object | array $firstElement, object | array $secondElement) use ($field, $order): int {
                 $accessor = PropertyAccess::createPropertyAccessor();
 
-                $firstProperty = (string) $accessor->getValue($firstElement, $field);
-                $secondProperty = (string) $accessor->getValue($secondElement, $field);
+                $firstProperty = $this->stringifySortValue($accessor->getValue($firstElement, $field));
+                $secondProperty = $this->stringifySortValue($accessor->getValue($secondElement, $field));
 
                 $result = strnatcasecmp($firstProperty, $secondProperty);
                 if ($order === 'DESC') {
@@ -37,21 +41,41 @@ final class SortByExtension extends AbstractExtension
                 }
 
                 return $result;
-            }
+            },
         );
 
         return $array;
     }
 
     /**
-     * @param \Traversable $iterable
+     * @param iterable<object|array<string, mixed>> $iterable
+     *
+     * @return list<object|array<string, mixed>>
      */
     private function transformIterableToArray(iterable $iterable): array
     {
         if (is_array($iterable)) {
-            return $iterable;
+            return array_values($iterable);
         }
 
-        return iterator_to_array($iterable);
+        return array_values(iterator_to_array($iterable));
+    }
+
+    private function stringifySortValue(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_scalar($value) || $value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        throw new \InvalidArgumentException(
+            sprintf(
+                'Cannot sort by field value of type "%s".',
+                get_debug_type($value),
+            ),
+        );
     }
 }

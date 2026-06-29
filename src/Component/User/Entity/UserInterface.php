@@ -2,24 +2,27 @@
 
 namespace App\Component\User\Entity;
 
-interface UserInterface
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
+interface UserInterface extends PasswordAuthenticatedUserInterface
 {
     public function getId(): ?int;
 
     public function getEmail(): ?string;
 
-    public function setEmail(string $email): User;
-
-    public function getRoles(): array;
-
-    public function setRoles(array $roles): User;
+    public function setEmail(string $email): self;
 
     /**
-     * @see PasswordAuthenticatedUserInterface
+     * @return list<string>
      */
-    public function getPassword(): string;
+    public function getRoles(): array;
 
-    public function setPassword(string $password): User;
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): self;
+
+    public function setPassword(string $password): self;
 
     public function getUsername(): ?string;
 

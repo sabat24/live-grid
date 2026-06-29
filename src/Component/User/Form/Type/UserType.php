@@ -78,7 +78,7 @@ class UserType extends AbstractResourceType
                 'validation_groups' => function (FormInterface $form): array {
                     $this->validationGroups[] = 'app_user';
                     $data = $form->getData();
-                    if ($data && !$data->getId()) {
+                    if ($data instanceof User && $data->getId() === null) {
                         $this->validationGroups[] = 'app_user_create';
                     }
 

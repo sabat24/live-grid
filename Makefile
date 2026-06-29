@@ -21,4 +21,12 @@ bash:
 	@$(PHP_CONT) bash
 
 static:
+	@$(PHP_CONT) php bin/console cache:warmup --env=dev --no-interaction --quiet
+	@$(PHP_CONT) php bin/console cache:warmup --env=test --no-interaction --quiet
 	@$(PHP_CONT) vendor/bin/phpstan analyse --memory-limit=512M
+
+install:
+	@$(PHP_CONT) composer install
+
+test:
+	@$(PHP_CONT) vendor/bin/phpunit

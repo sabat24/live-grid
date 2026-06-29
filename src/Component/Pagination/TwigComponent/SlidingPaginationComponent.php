@@ -18,6 +18,11 @@ final class SlidingPaginationComponent
 
     public ViewData $viewData;
 
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     #[PreMount(1)]
     public function validateIncomingData(array $data): array
     {
@@ -26,9 +31,17 @@ final class SlidingPaginationComponent
         $resolver->setRequired(['page', 'totalItemCount']);
         $resolver->setDefined(['resultsPerPage']);
 
-        return $resolver->resolve($data);
+        /** @var array<string, mixed> $resolved */
+        $resolved = $resolver->resolve($data);
+
+        return $resolved;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     #[PostMount]
     public function createViewData(array $data): array
     {

@@ -1,0 +1,19 @@
+parameters:
+    level: max
+    paths:
+        - src/
+        - tests/
+    phpVersion:
+        min: 80100
+        max: 80599
+    symfony:
+        containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml
+    doctrine:
+        objectManagerLoader: tests/phpstan/object-manager.php
+    treatPhpDocTypesAsCertain: true
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        -
+            identifier: method.unused
+            message: '#^Method App\\Component\\User\\LiveComponent\\Admin\\UserListComponent::getDataModelValue\(\) is unused\.$#'
+            path: src/Component/User/LiveComponent/Admin/UserListComponent.php

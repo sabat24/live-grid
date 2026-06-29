@@ -97,10 +97,10 @@ Once inside the container, run the following commands:
 composer install
 ```
 
-#### b) Install Node.js assets
+#### b) Install Node.js assets and build them
 
 ```bash
-yarn install
+yarn install && yarn dev
 ```
 
 #### c) Run database migrations
