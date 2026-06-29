@@ -40,10 +40,7 @@ export default class extends Controller {
                 return;
             }
 
-            const queryString = component.element.__component?.queryString;
-            if (!queryString) {
-                return;
-            }
+            const queryString = component.element.__component?.queryString ?? '';
 
             let componentSearchParams = new URLSearchParams(queryString);
             let windowSearchParams = new URLSearchParams(window.location.search.substring(1));

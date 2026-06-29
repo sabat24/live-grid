@@ -97,22 +97,38 @@ final class UserListUrlSyncE2eTest extends AbstractUserListE2eTestCase
         $this->assertListCurrentPage(0, 2);
     }
 
-    /**
-     * @return list<string>
-     */
-    private function getListComponentNames(): array
+    public function testClearingEmailFilterRemovesUrlParamAndSurvivesReload(): void
     {
-        $names = $this->page->evaluate(
-            <<<'JS'
-            () => [...document.querySelectorAll('[data-live-url-value]')].filter((el) => el.querySelector('.flex-table-wrapper') !== null).map((el) => {
-                const props = JSON.parse(el.getAttribute('data-live-props-value') || '{}');
-                return props.componentName || '';
-            })
-            JS,
-        );
+        $this->visitUsersIndex();
 
-        self::assertIsArray($names);
+        $componentName = $this->getListComponentName(0);
+        $filterQuery = http_build_query([
+            $componentName => [
+                'user_list_filter' => [
+                    'email' => 'admin',
+                ],
+            ],
+        ]);
 
-        return array_values(array_filter($names, static fn(mixed $name): bool => is_string($name) && '' !== $name));
+        $this->visitUsersIndexWithComponentQuery($filterQuery);
+        $this->assertListRowCount(0, 1);
+
+        $searchWithFilter = $this->page->evaluate('() => window.location.search');
+        self::assertIsString($searchWithFilter);
+        self::assertStringContainsString('email', $searchWithFilter);
+
+        $this->clearEmailFilterAndSubmit(0);
+
+        $searchAfterClear = $this->pollLocationSearchNotContaining('email');
+        self::assertStringNotContainsString('email', $searchAfterClear);
+        $this->assertListRowCount(0, 10);
+
+        $this->reloadAndWait();
+
+        $searchAfterReload = $this->page->evaluate('() => window.location.search');
+        self::assertIsString($searchAfterReload);
+        self::assertStringNotContainsString('email', $searchAfterReload);
+        self::assertSame($searchAfterClear, $searchAfterReload);
+        $this->assertListRowCount(0, 10);
     }
 }
