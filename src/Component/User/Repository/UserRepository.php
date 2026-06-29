@@ -10,8 +10,6 @@ use Sylius\Component\Resource\Repository\RepositoryInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
- *
- * @implements RepositoryInterface<User>
  */
 class UserRepository extends ServiceEntityRepository implements RepositoryInterface
 {

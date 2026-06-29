@@ -1,0 +1,7 @@
+# Override for browsing the app against the E2E database in a real browser.
+# PHP-FPM serves Symfony with APP_ENV=test (.env.test → db_e2e / live-grid_e2e).
+services:
+    app:
+        environment:
+            APP_ENV: test
+            APP_DEBUG: "0"

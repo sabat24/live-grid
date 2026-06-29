@@ -2,7 +2,7 @@
 
 namespace App\Component\User\Form\FilterType;
 
-use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
+use Spiriit\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;

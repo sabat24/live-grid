@@ -1,0 +1,15 @@
+playwright:
+    enabled: true
+    debug: false
+    default_browser: 'default'
+    base_url: 'http://localhost'
+    intercepted_hosts:
+        - 'localhost'
+        - '127.0.0.1'
+
+    browsers:
+        default:
+            type: 'chromium'
+            headless: true
+            timeout_ms: 30000
+            slowmo_ms: 0

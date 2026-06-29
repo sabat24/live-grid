@@ -23,18 +23,20 @@ final class LiveComponentTestHelper
 
     public static function snapshotFromNode(Crawler $node): LiveComponentSnapshot
     {
+        $props = self::decodeJson($node->attr('data-live-props-value') ?? '{}');
+
         return new LiveComponentSnapshot(
             $node,
             $node->attr('data-live-url-value') ?? '',
-            self::decodeJson($node->attr('data-live-data-value') ?? '{}'),
-            self::decodeJson($node->attr('data-live-props-value') ?? '{}'),
+            $props,
+            $props,
             $node->attr('data-live-csrf-value'),
         );
     }
 
     /**
      * @param array<string, mixed> $args
-     * @param array<string, mixed> $dataOverrides
+     * @param array<string, mixed> $updated
      * @throws \JsonException
      */
     public static function callLiveAction(
@@ -42,23 +44,24 @@ final class LiveComponentTestHelper
         LiveComponentSnapshot $component,
         string $action,
         array $args = [],
-        array $dataOverrides = [],
+        array $updated = [],
     ): Crawler {
-        $data = array_merge($component->props, $component->data, $dataOverrides);
-
         $client->request(
             'POST',
             $component->url.'/'.$action,
+            parameters: [
+                'data' => json_encode([
+                    'props' => $component->props,
+                    'updated' => self::flattenUpdated($updated),
+                    'args' => $args,
+                    'children' => [],
+                    'propsFromParent' => [],
+                ], \JSON_THROW_ON_ERROR),
+            ],
             server: [
                 'HTTP_ACCEPT' => 'application/vnd.live-component+html',
-                'HTTP_CONTENT_TYPE' => 'application/json',
                 'HTTP_X-CSRF-TOKEN' => $component->csrfToken ?? '',
             ],
-            content: json_encode([
-                'data' => $data,
-                'args' => $args,
-                'childrenFingerprints' => [],
-            ], \JSON_THROW_ON_ERROR),
         );
 
         if (!$client->getResponse()->isSuccessful()) {
@@ -89,6 +92,29 @@ final class LiveComponentTestHelper
 
         /** @var array<string, mixed> $decoded */
         return $decoded;
+    }
+
+    /**
+     * @param array<string, mixed> $updated
+     *
+     * @return array<string, mixed>
+     */
+    private static function flattenUpdated(array $updated, string $prefix = ''): array
+    {
+        $result = [];
+
+        foreach ($updated as $key => $value) {
+            $path = '' === $prefix ? $key : $prefix.'.'.$key;
+            if (is_array($value)) {
+                /** @var array<string, mixed> $nested */
+                $nested = $value;
+                $result += self::flattenUpdated($nested, $path);
+            } else {
+                $result[$path] = $value;
+            }
+        }
+
+        return $result;
     }
 }
 

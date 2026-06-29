@@ -12,7 +12,6 @@ use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use Symfony\UX\LiveComponent\LiveComponentHydrator;
 
 #[AsLiveComponent('admin:resource_form', 'Admin/Crud/Create/_live_form.html.twig', route: 'live_component_admin')]
 final class ResourceFormComponent extends AbstractController
@@ -70,7 +69,6 @@ final class ResourceFormComponent extends AbstractController
                 $value,
                 $this->resourceClass,
                 'json',
-                [LiveComponentHydrator::LIVE_CONTEXT => true],
             );
         } catch (ExceptionInterface $exception) {
             $json = json_encode($value);

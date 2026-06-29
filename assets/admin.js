@@ -32,5 +32,5 @@ feather.replace();
 window.feather = feather;
 
 // start the Stimulus application
-import './bootstrap';
+import './stimulus_bootstrap.js';
 
