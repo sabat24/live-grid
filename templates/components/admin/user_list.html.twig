@@ -6,15 +6,15 @@
 {% set definition = this.grid.definition %}
 {% set data = this.grid.data %}
 
-<div {{ attributes.add(stimulus_controller('queryable content')) }}>
+<div {{ attributes.defaults(stimulus_controller('queryable content')) }}>
     <div class="flex-table-wrapper">
         <div class="columns flex-table-filter-bar">
             <div class="column is-four-fifths left">
                 <hr class="dropdown-divider is-hidden-tablet" />
                 {{ form_start(form, {
                     attr: {
-                        'data-action': 'live#action',
-                        'data-action-name': 'prevent|search',
+                        'data-action': 'submit->live#action:prevent',
+                        'data-live-action-param': 'search',
                     }
                 }) }}
 

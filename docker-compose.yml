@@ -15,12 +15,17 @@ services:
             DB_DATABASE: live-grid
             DB_USERNAME: live-grid_user
             DB_PASSWORD: live-grid_pass
+            PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
         working_dir: /var/www
         volumes:
             - .:/var/www
             - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+            - playwright_cache:/ms-playwright
         depends_on:
-            - db
+            db:
+                condition: service_healthy
+            db_e2e:
+                condition: service_healthy
         networks:
             - app_network
 
@@ -35,9 +40,11 @@ services:
             - .:/var/www
             - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
         networks:
-            - app_network
+            app_network:
+                aliases:
+                    - live-grid.lh
 
-    #MySQL Service
+    #MySQL Service (dev + unit/functional tests with DAMA)
     db:
         image: mariadb:10.2.19
         restart: unless-stopped
@@ -62,12 +69,39 @@ services:
             timeout: 5s
             retries: 5
 
-#Docker Networks
+    #MySQL Service (Playwright E2E — no DAMA, committed writes survive reloads)
+    db_e2e:
+        image: mariadb:10.2.19
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "3307:3306"
+        environment:
+            MYSQL_DATABASE: live-grid_e2e
+            MYSQL_ROOT_PASSWORD: live-grid_root_pass
+            MYSQL_USER: live-grid_user
+            MYSQL_PASSWORD: live-grid_pass
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql_e2e
+        volumes:
+            - dbdata_e2e:/var/lib/mysql
+            - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+        networks:
+            - app_network
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "live-grid_user", "-plive-grid_pass"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
 networks:
     app_network:
         driver: bridge
 
-#Docker Volumes
 volumes:
     dbdata:
+        driver: local
+    dbdata_e2e:
+        driver: local
+    playwright_cache:
         driver: local

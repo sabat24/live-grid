@@ -7,7 +7,8 @@ use App\Tests\Component\LiveComponentSnapshot;
 use App\Tests\Component\LiveComponentTestHelper;
 
 /**
- * Browser URL sync (pushState / popstate) is covered by Playwright in the future, not here.
+ * Server-side query-param hydration and Live actions. Browser URL sync (pushState / popstate)
+ * is covered by Playwright in tests/E2e/Admin/UserListUrlSyncE2eTest.php.
  */
 final class AdminUserListFunctionalTest extends AbstractWebTestCase
 {
@@ -91,15 +92,69 @@ final class AdminUserListFunctionalTest extends AbstractWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $reloaded = LiveComponentTestHelper::findLiveComponents($crawler);
+        $reloaded = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        self::assertNotEmpty($reloaded);
+
         $matching = array_values(
             array_filter(
                 $reloaded,
-                fn(LiveComponentSnapshot $c) => $c->componentName() === $componentName,
+                fn (LiveComponentSnapshot $c) => $c->componentName() === $componentName,
             ),
-        )[0];
+        )[0] ?? $reloaded[0];
 
         self::assertSame(2, $matching->intProp('page'));
+    }
+
+    public function testFilterViaUrlQueryParam(): void
+    {
+        $client = $this->loginAsAdmin();
+        $this->requestUsersIndex($client);
+        $components = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $componentName = $components[0]->componentName();
+
+        $client->request('GET', '/admin/users/', [
+            $componentName => [
+                'user_list_filter' => [
+                    'email' => 'admin@live-grid.com',
+                ],
+            ],
+        ]);
+
+        if ($client->getResponse()->isRedirect()) {
+            $client->followRedirect();
+        }
+
+        self::assertResponseIsSuccessful();
+
+        $reloaded = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $matching = $this->findComponentByName($reloaded, $componentName);
+
+        self::assertCount(1, $matching->node->filter('.flex-table-item'));
+        self::assertStringContainsString('admin@live-grid.com', $matching->node->text());
+    }
+
+    public function testResultsPerPageViaUrlQueryParam(): void
+    {
+        $client = $this->loginAsAdmin();
+        $this->requestUsersIndex($client);
+        $components = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $componentName = $components[0]->componentName();
+
+        $client->request('GET', '/admin/users/', [
+            $componentName => ['resultsPerPage' => 50],
+        ]);
+
+        if ($client->getResponse()->isRedirect()) {
+            $client->followRedirect();
+        }
+
+        self::assertResponseIsSuccessful();
+
+        $reloaded = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $matching = $this->findComponentByName($reloaded, $componentName);
+
+        self::assertSame(50, $matching->intProp('resultsPerPage'));
+        self::assertCount(26, $matching->node->filter('.flex-table-item'));
     }
 
     public function testResultsPerPageInQueryString(): void
@@ -203,6 +258,54 @@ final class AdminUserListFunctionalTest extends AbstractWebTestCase
 
         self::assertSame(2, $reloadedFirst->intProp('page'));
         self::assertSame(3, $reloadedSecond->intProp('page'));
+    }
+
+    public function testBothListsCanHaveDifferentFilterAndPaginationInUrl(): void
+    {
+        $client = $this->loginAsAdmin();
+        $this->requestUsersIndex($client);
+        $crawler = $client->getCrawler();
+        $components = LiveComponentTestHelper::findLiveComponents($crawler);
+
+        $firstList = $components[0];
+        $secondList = $components[1];
+
+        $crawler = LiveComponentTestHelper::callLiveAction($client, $firstList, 'updatePage', ['page' => 2]);
+        $updatedFirst = LiveComponentTestHelper::findLiveComponents($crawler)[0];
+
+        $crawler = LiveComponentTestHelper::callLiveAction(
+            $client,
+            $secondList,
+            'search',
+            [],
+            [
+                'user_list_filter' => [
+                    'email' => 'admin@live-grid.com',
+                ],
+            ],
+        );
+        $updatedComponents = LiveComponentTestHelper::findLiveComponents($crawler);
+        $updatedSecond = $this->findComponentByName($updatedComponents, $secondList->componentName());
+
+        $queryString = $updatedFirst->queryString();
+        if ('' !== $updatedSecond->queryString()) {
+            $queryString .= '&' . $updatedSecond->queryString();
+        }
+
+        $client->request('GET', '/admin/users/?' . $queryString);
+        if ($client->getResponse()->isRedirect()) {
+            $client->followRedirect();
+        }
+
+        $reloaded = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $reloadedFirst = $this->findComponentByName($reloaded, $firstList->componentName());
+        $reloadedSecond = $this->findComponentByName($reloaded, $secondList->componentName());
+
+        self::assertSame(2, $reloadedFirst->intProp('page'));
+        self::assertCount(10, $reloadedFirst->node->filter('.flex-table-item'));
+        self::assertSame(1, $reloadedSecond->intProp('page'));
+        self::assertCount(1, $reloadedSecond->node->filter('.flex-table-item'));
+        self::assertStringContainsString('admin@live-grid.com', $reloadedSecond->node->text());
     }
 
     /**

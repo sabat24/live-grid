@@ -53,6 +53,10 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
      */
     public function getUserIdentifier(): string
     {
+        if ('' === $this->email) {
+            throw new \LogicException('User email must be set before resolving the identifier.');
+        }
+
         return $this->email;
     }
 

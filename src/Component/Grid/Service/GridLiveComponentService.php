@@ -4,7 +4,7 @@ namespace App\Component\Grid\Service;
 
 use App\Component\Grid\Model\GridComponentInterface;
 use App\Component\User\Entity\User;
-use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdaterInterface;
+use Spiriit\Bundle\FormFilterBundle\Filter\FilterBuilderUpdaterInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Exception\LessThan1CurrentPageException;
 use Pagerfanta\Exception\OutOfRangeCurrentPageException;

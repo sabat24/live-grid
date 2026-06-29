@@ -1,1 +1,7 @@
-# Test-only service overrides (intentionally empty — tests instantiate fixtures manually).
+services:
+    _defaults:
+        autoconfigure: true
+
+    App\Tests\E2e\EventSubscriber\PlaywrightStaticAssetSubscriber:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

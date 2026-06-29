@@ -12,5 +12,5 @@ const feather = require('feather-icons');
 feather.replace();
 
 // start the Stimulus application
-import './bootstrap';
+import './stimulus_bootstrap.js';
 

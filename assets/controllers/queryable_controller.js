@@ -1,5 +1,4 @@
 import {Controller} from '@hotwired/stimulus';
-import {getComponent} from '@symfony/ux-live-component';
 import * as Array from '../helpers/array';
 
 export default class extends Controller {
@@ -7,19 +6,33 @@ export default class extends Controller {
         this.element.__component.windowQueryString = window.location.search.substring(1);
     }
 
-    async initialize() {
-        let that = this;
-        this.component = await getComponent(this.element);
-        window.addEventListener('popstate', function (e) {
-            that.initQueryString()
-            that.component.render();
-        });
-    }
-
-    async connect() {
+    connect() {
         this.element[this.identifier] = this;
 
-        this.component = await getComponent(this.element);
+        window.addEventListener('popstate', () => {
+            this.initQueryString();
+            this.component?.render();
+        });
+
+        const bindComponent = (component) => {
+            this.component = component;
+            this.bindRenderFinished();
+        };
+
+        this.element.addEventListener('live:connect', (event) => {
+            bindComponent(event.detail.component);
+        });
+
+        if (this.element.__component) {
+            bindComponent(this.element.__component);
+        }
+    }
+
+    bindRenderFinished() {
+        if (this._renderFinishedBound) {
+            return;
+        }
+        this._renderFinishedBound = true;
 
         this.component.on('render:finished', (component) => {
             // we rerender component using browser history; so do not change history state
@@ -27,7 +40,12 @@ export default class extends Controller {
                 return;
             }
 
-            let componentSearchParams = new URLSearchParams(component.element.__component.queryString);
+            const queryString = component.element.__component?.queryString;
+            if (!queryString) {
+                return;
+            }
+
+            let componentSearchParams = new URLSearchParams(queryString);
             let windowSearchParams = new URLSearchParams(window.location.search.substring(1));
 
             let windowEntries = [];
@@ -67,7 +85,7 @@ export default class extends Controller {
                 window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
             }
 
-            this.element.__component.windowQueryString = null
+            this.element.__component.windowQueryString = null;
         });
     }
 }

@@ -1,59 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Factory;
 
 use App\Component\User\Entity\User;
-use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
-use Zenstruck\Foundry\ModelFactory;
-use Zenstruck\Foundry\Proxy;
-use Zenstruck\Foundry\RepositoryProxy;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends ModelFactory<User>
- *
- * @method User|Proxy<User> create(array<string, mixed>|callable $attributes = [])
- * @method static User|Proxy<User> createOne(array<string, mixed> $attributes = [])
- * @method static User|Proxy<User> find(object|array<string, mixed> $criteria)
- * @method static User|Proxy<User> findOrCreate(array<string, mixed> $attributes)
- * @method static User|Proxy<User> first(string $sortedField = 'id')
- * @method static User|Proxy<User> last(string $sortedField = 'id')
- * @method static User|Proxy<User> random(array<string, mixed> $attributes = [])
- * @method static User|Proxy<User> randomOrCreate(array<string, mixed> $attributes = [])
- * @method static EntityRepository|RepositoryProxy<User> repository()
- * @method static list<User|Proxy<User>> all()
- * @method static list<User|Proxy<User>> createMany(int $number, array<string, mixed>|callable $attributes = [])
- * @method static list<User|Proxy<User>> createSequence(iterable<array<string, mixed>|callable> $sequence)
- * @method static list<User|Proxy<User>> findBy(array<string, mixed> $attributes)
- * @method static list<User|Proxy<User>> randomRange(int $min, int $max, array<string, mixed> $attributes = [])
- * @method static list<User|Proxy<User>> randomSet(int $number, array<string, mixed> $attributes = [])
+ * @extends PersistentObjectFactory<User>
  */
-final class UserFactory extends ModelFactory
+final class UserFactory extends PersistentObjectFactory
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    ) {
         parent::__construct();
+    }
+
+    public static function class(): string
+    {
+        return User::class;
     }
 
     /**
      * @return array<string, mixed>
      */
-    protected function getDefaults(): array
+    protected function defaults(): array
     {
         return [
-            'email' => self::faker()->email(),
-            'username' => self::faker()->userName(),
-            'password' => self::faker()->text(),
+            'email' => self::faker()->unique()->email(),
+            'username' => self::faker()->unique()->userName(),
+            'password' => 'password',
             'roles' => [],
         ];
     }
 
-    protected function initialize(): self
+    protected function initialize(): static
     {
-        return $this;
-    }
+        return $this->afterInstantiate(function (User $user, array $attributes): void {
+            if (!isset($attributes['password']) || !\is_string($attributes['password'])) {
+                return;
+            }
 
-    protected static function getClass(): string
-    {
-        return User::class;
+            $user->setPassword($this->passwordHasher->hashPassword($user, $attributes['password']));
+        });
     }
 }

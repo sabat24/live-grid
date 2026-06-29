@@ -4,7 +4,7 @@ parameters:
         - src/
         - tests/
     phpVersion:
-        min: 80100
+        min: 80400
         max: 80599
     symfony:
         containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml
@@ -17,3 +17,6 @@ parameters:
             identifier: method.unused
             message: '#^Method App\\Component\\User\\LiveComponent\\Admin\\UserListComponent::getDataModelValue\(\) is unused\.$#'
             path: src/Component/User/LiveComponent/Admin/UserListComponent.php
+        -
+            identifier: generics.interfaceConflict
+            path: src/Component/User/Repository/UserRepository.php

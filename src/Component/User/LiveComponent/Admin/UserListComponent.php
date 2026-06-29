@@ -91,7 +91,12 @@ final class UserListComponent implements GridComponentInterface
      */
     public function getSearchFormInstance(): FormInterface
     {
-        return $this->getFormInstance();
+        $form = $this->instantiateForm();
+        if ($this->formValues !== []) {
+            $form->submit($this->formValues);
+        }
+
+        return $form;
     }
 
     #[LiveAction]
@@ -144,8 +149,7 @@ final class UserListComponent implements GridComponentInterface
      */
     protected function applyQueryableFormParams(array $params): void
     {
-        $form = $this->getFormInstance();
-        $formName = $form->getName();
+        $formName = $this->instantiateForm()->getName();
         if (isset($params[$formName]) && is_array($params[$formName])) {
             $this->formValues = $params[$formName];
             $this->submitForm();
@@ -154,7 +158,7 @@ final class UserListComponent implements GridComponentInterface
 
     protected function resolveQueryableFormView(): FormView
     {
-        return $this->getForm();
+        return $this->getFormView();
     }
 
     protected function resetQueryableFormView(): void

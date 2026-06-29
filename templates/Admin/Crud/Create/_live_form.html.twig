@@ -1,6 +1,6 @@
 {% form_theme form 'UiBundle/Form/huroTheme.html.twig' %}
 
-<div {{ attributes.add(stimulus_controller('form')) }}>
+<div {{ attributes.defaults(stimulus_controller('form')) }}>
     {% set method = resource is null ? 'POST' : 'PUT' %}
 
     {{ form_start(form, {'action': action, 'method': method}) }}

@@ -17,6 +17,11 @@ use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 trait QueryableComponentTrait
 {
+    /** @var list<string>|null */
+    private static ?array $adoptableQueryKeys = null;
+
+    private static ?int $adoptableQueryKeysRequestId = null;
+
     #[LiveProp(writable: true)]
     public ?string $queryString = null;
     #[LiveProp(writable: true)]
@@ -125,12 +130,12 @@ trait QueryableComponentTrait
     public function updatePropsFromRequest(array $data): array
     {
         $this->initializeQueryable();
-        $this->componentName = $this->generateComponentName();
+        $request = $this->getRequestStack()->getCurrentRequest();
+        $this->componentName = $this->resolveComponentName($request);
         if ($this->generateUniqueComponentName && !isset($data['data-live-id'])) {
             $data['data-live-id'] = $this->componentName;
         }
 
-        $request = $this->getRequestStack()->getCurrentRequest();
         if ($request instanceof Request && $request->query->has($this->componentName)) {
             $componentParams = $request->query->all()[$this->componentName] ?? null;
             if (is_array($componentParams)) {
@@ -139,6 +144,26 @@ trait QueryableComponentTrait
         }
 
         return $data;
+    }
+
+    private function resolveComponentName(?Request $request): string
+    {
+        if ($this->generateUniqueComponentName && $request instanceof Request) {
+            $requestId = spl_object_id($request);
+            if (self::$adoptableQueryKeysRequestId !== $requestId) {
+                self::$adoptableQueryKeysRequestId = $requestId;
+                self::$adoptableQueryKeys = array_values(array_filter(
+                    array_keys($request->query->all()),
+                    static fn (string $key): bool => is_array($request->query->all()[$key]),
+                ));
+            }
+
+            if (self::$adoptableQueryKeys !== null && self::$adoptableQueryKeys !== []) {
+                return array_shift(self::$adoptableQueryKeys);
+            }
+        }
+
+        return $this->generateComponentName();
     }
 
     #[PostHydrate]

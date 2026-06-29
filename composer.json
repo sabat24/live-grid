@@ -1,39 +1,38 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.1.0",
+        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "babdev/pagerfanta-bundle": "^3.7",
-        "doctrine/doctrine-bundle": "^2.5",
+        "babdev/pagerfanta-bundle": "^4.0",
+        "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.2",
-        "doctrine/orm": "^2.11",
-        "knplabs/knp-menu-bundle": "3.2.*",
-        "lexik/form-filter-bundle": "~7.0",
-        "pagerfanta/doctrine-orm-adapter": "^3.7",
+        "doctrine/orm": "^3.3",
+        "knplabs/knp-menu-bundle": "^3.7",
+        "pagerfanta/doctrine-orm-adapter": "^4.0",
+        "spiriitlabs/form-filter-bundle": "^12.0",
         "stof/doctrine-extensions-bundle": "^1.7",
-        "sylius/grid-bundle": "^1.12",
-        "sylius/resource-bundle": "1.10.*",
+        "sylius/grid-bundle": "^1.13",
+        "sylius/resource-bundle": "^1.12",
         "symfony/apache-pack": "^1.0",
-        "symfony/console": "6.1.*",
-        "symfony/dotenv": "6.1.*",
+        "symfony/console": "7.4.*",
+        "symfony/dotenv": "7.4.*",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "6.1.*",
-        "symfony/intl": "6.1.*",
-        "symfony/property-info": "6.1.*",
-        "symfony/proxy-manager-bridge": "6.1.*",
-        "symfony/runtime": "6.1.*",
-        "symfony/security-bundle": "6.1.*",
-        "symfony/templating": "6.1.*",
-        "symfony/translation": "6.1.*",
-        "symfony/ux-autocomplete": "^2.7",
-        "symfony/ux-live-component": "2.x-dev",
-        "symfony/ux-twig-component": "^2.7",
-        "symfony/webpack-encore-bundle": "^1.16",
-        "symfony/yaml": "6.1.*"
+        "symfony/framework-bundle": "7.4.*",
+        "symfony/intl": "7.4.*",
+        "symfony/property-info": "7.4.*",
+        "symfony/runtime": "7.4.*",
+        "symfony/security-bundle": "7.4.*",
+        "symfony/serializer": "7.4.*",
+        "symfony/translation": "7.4.*",
+        "symfony/ux-autocomplete": "^3.1",
+        "symfony/ux-live-component": "^3.1",
+        "symfony/ux-twig-component": "^3.1",
+        "symfony/webpack-encore-bundle": "^2.0",
+        "symfony/yaml": "7.4.*"
     },
     "config": {
         "allow-plugins": {
@@ -64,7 +63,10 @@
         "symfony/polyfill-php72": "*",
         "symfony/polyfill-php73": "*",
         "symfony/polyfill-php74": "*",
-        "symfony/polyfill-php80": "*"
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*",
+        "symfony/polyfill-php83": "*"
     },
     "scripts": {
         "auto-scripts": {
@@ -87,11 +89,11 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "6.1.*"
+            "require": "7.4.*"
         }
     },
     "require-dev": {
-        "dama/doctrine-test-bundle": "^7.3",
+        "dama/doctrine-test-bundle": "^8.2",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "friends-of-behat/mink-browserkit-driver": "^1.6",
         "friends-of-behat/mink-extension": "^2.6",
@@ -102,16 +104,17 @@
         "phpstan/phpstan-phpunit": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",
-        "phpunit/phpunit": "^9.5",
-        "symfony/browser-kit": "6.1.*",
-        "symfony/css-selector": "6.1.*",
-        "symfony/debug-bundle": "6.1.*",
+        "phpunit/phpunit": "^12.0",
+        "playwright-php/playwright-symfony": "^0.9",
+        "symfony/browser-kit": "7.4.*",
+        "symfony/css-selector": "7.4.*",
+        "symfony/debug-bundle": "7.4.*",
         "symfony/maker-bundle": "^1.38",
         "symfony/monolog-bundle": "^3.0",
-        "symfony/phpunit-bridge": "^6.0",
-        "symfony/stopwatch": "6.1.*",
-        "symfony/var-dumper": "6.1.*",
-        "symfony/web-profiler-bundle": "6.1.*",
-        "zenstruck/foundry": "^1.26"
+        "symfony/phpunit-bridge": "^7.0",
+        "symfony/stopwatch": "7.4.*",
+        "symfony/var-dumper": "7.4.*",
+        "symfony/web-profiler-bundle": "7.4.*",
+        "zenstruck/foundry": "^2.10"
     }
 }

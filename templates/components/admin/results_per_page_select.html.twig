@@ -11,7 +11,7 @@
                 {% for item in this.resultsPerPageChoices %}
                     <div class="option-row">
                         <div class="option-meta">
-                            <span data-action="click->live#action" data-action-name="updateResultsPerPage(resultsPerPage={{ item }})">{{ 'drako.ui.results_per_page'|trans({resultsPerPage: item})|raw }}</span>
+                            <span data-action="click->live#action" data-live-action-param="updateResultsPerPage" data-live-results-per-page-param="{{ item }}">{{ 'drako.ui.results_per_page'|trans({resultsPerPage: item})|raw }}</span>
                         </div>
                     </div>
                 {% endfor %}
