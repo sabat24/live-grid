@@ -3,11 +3,11 @@
 namespace App\Component\LiveComponent\Attribute;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
-final class QueryableProp
+final readonly class QueryableProp
 {
     public function __construct(
-        private readonly bool $writable = true,
-        private readonly ?string $fieldName = null,
+        private bool $writable = true,
+        private ?string $fieldName = null,
     ) {
     }
 
