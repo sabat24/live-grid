@@ -13,7 +13,10 @@ final class ViewData
     public int $pageRange;
     public int $startPage;
     public int $endPage;
+
+    /** @var list<int> */
     public array $pagesInRange;
+
     public int $firstPageInRange;
     public int $lastPageInRange;
     public ?int $next = null;

@@ -14,9 +14,6 @@ final class EncodePasswordSubscriber implements EventSubscriberInterface
     ) {
     }
 
-    /**
-     * @return  array<string, mixed>
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -27,7 +24,6 @@ final class EncodePasswordSubscriber implements EventSubscriberInterface
 
     public function encodePlainPassword(GenericEvent $event): void
     {
-
         $subject = $event->getSubject();
 
         if (!$subject instanceof UserInterface) {

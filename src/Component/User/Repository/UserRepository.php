@@ -8,6 +8,11 @@ use Doctrine\Persistence\ManagerRegistry;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\ResourceRepositoryTrait;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 
+/**
+ * @extends ServiceEntityRepository<User>
+ *
+ * @implements RepositoryInterface<User>
+ */
 class UserRepository extends ServiceEntityRepository implements RepositoryInterface
 {
     use ResourceRepositoryTrait;

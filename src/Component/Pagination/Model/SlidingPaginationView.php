@@ -6,13 +6,6 @@ final class SlidingPaginationView extends AbstractPaginationView
 {
     private int $pageRange = 5;
 
-    private ?int $pageLimit = null;
-
-    public function __construct(
-        private readonly array $params,
-    ) {
-    }
-
     public function getPaginationData(): ViewData
     {
         $pageCount = $this->getPageCount();
@@ -26,7 +19,7 @@ final class SlidingPaginationView extends AbstractPaginationView
             $this->pageRange = $pageCount;
         }
 
-        $delta = \ceil($this->pageRange / 2);
+        $delta = (int) \ceil($this->pageRange / 2);
 
         if ($current - $delta > $pageCount - $this->pageRange) {
             $pages = \range($pageCount - $this->pageRange + 1, $pageCount);
@@ -39,7 +32,7 @@ final class SlidingPaginationView extends AbstractPaginationView
             $pages = \range($offset + 1, $offset + $this->pageRange);
         }
 
-        $proximity = \floor($this->pageRange / 2);
+        $proximity = (int) \floor($this->pageRange / 2);
 
         $startPage = $current - $proximity;
         $endPage = $current + $proximity;
@@ -63,7 +56,7 @@ final class SlidingPaginationView extends AbstractPaginationView
         $viewData->totalCount = $this->totalCount;
         $viewData->pageRange = $this->pageRange;
         $viewData->startPage = $startPage;
-        $viewData->endPage = (int) $endPage;
+        $viewData->endPage = $endPage;
 
         if ($current > 1) {
             $viewData->previous = $current - 1;
@@ -73,7 +66,7 @@ final class SlidingPaginationView extends AbstractPaginationView
             $viewData->next = $current + 1;
         }
 
-        $viewData->pagesInRange = $pages;
+        $viewData->pagesInRange = array_map('intval', $pages);
         $viewData->firstPageInRange = \min($pages);
         $viewData->lastPageInRange = \max($pages);
 
@@ -82,12 +75,6 @@ final class SlidingPaginationView extends AbstractPaginationView
 
     public function getPageCount(): int
     {
-        $count = \ceil($this->totalCount / $this->numItemsPerPage);
-
-        if ($this->pageLimit !== null) {
-            return \min($count, $this->pageLimit);
-        }
-
-        return $count;
+        return (int) \ceil($this->totalCount / $this->numItemsPerPage);
     }
 }

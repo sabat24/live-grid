@@ -3,6 +3,7 @@
 namespace App\Component\Grid\Service;
 
 use App\Component\Grid\Model\GridComponentInterface;
+use App\Component\User\Entity\User;
 use Lexik\Bundle\FormFilterBundle\Filter\FilterBuilderUpdaterInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Exception\LessThan1CurrentPageException;
@@ -16,6 +17,7 @@ use Sylius\Component\Grid\Parameters;
 use Sylius\Component\Grid\Provider\ChainProvider;
 use Sylius\Component\Grid\View\GridView;
 use Sylius\Component\Resource\Metadata\RegistryInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class GridLiveComponentService
@@ -44,15 +46,25 @@ final class GridLiveComponentService
 
     private function resolveConfiguration(string $gridName): void
     {
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->getCurrentRequest();
         $this->grid = $this->gridProvider->get($gridName);
-        $resourceClass = $this->grid->getDriverConfiguration()['class'];
+        $resourceClass = $this->grid->getDriverConfiguration()['class'] ?? null;
+        if (!is_string($resourceClass)) {
+            throw new \LogicException(
+                sprintf('Grid "%s" is missing a resource class in driver configuration.', $gridName),
+            );
+        }
 
         $metadata = $this->registry->getByClass($resourceClass);
 
-        $params = $request->attributes->get('_sylius', []);
-        $params = array_merge($params, $this->liveComponent->getConfiguration());
-        $request->attributes->add(['_sylius' => $params]);
+        $syliusParams = $request->attributes->get('_sylius', []);
+        if (!is_array($syliusParams)) {
+            $syliusParams = [];
+        }
+
+        $componentConfiguration = $this->liveComponent->getConfiguration();
+        $params = array_merge($syliusParams, $componentConfiguration);
+        $request->attributes->set('_sylius', $params);
 
         $this->configuration = $this->requestConfigurationFactory->create($metadata, $request);
 
@@ -65,9 +77,11 @@ final class GridLiveComponentService
         );
     }
 
-    public function createPaginator($page, $resultsPerPage): Pagerfanta
+    /**
+     * @return Pagerfanta<User>
+     */
+    public function createPaginator(int $page, int $resultsPerPage): Pagerfanta
     {
-        // initialize a query builder
         $filterQueryBuilder = $this->liveComponent->createFilterQueryBuilder();
 
         if ($this->configuration->isFilterable()) {
@@ -75,6 +89,7 @@ final class GridLiveComponentService
             $this->filterBuilderUpdater->addFilterConditions($form, $filterQueryBuilder);
         }
 
+        /** @var Pagerfanta<User> $paginator */
         $paginator = new Pagerfanta(new QueryAdapter($filterQueryBuilder, false, false));
         try {
             $paginator->setMaxPerPage($resultsPerPage)->setCurrentPage($page);
@@ -87,13 +102,42 @@ final class GridLiveComponentService
         return $paginator;
     }
 
+    /**
+     * @return list<int>
+     */
     public function getAllowedPaginate(): array
     {
-        return $this->configuration->getParameters()->get('allowed_paginate');
+        $allowed = $this->configuration->getParameters()->get('allowed_paginate');
+        if (!is_array($allowed)) {
+            return [];
+        }
+
+        return array_values(
+            array_filter(
+                array_map(static function (mixed $value): ?int {
+                    if (!is_numeric($value)) {
+                        return null;
+                    }
+
+                    return (int) $value;
+                }, $allowed),
+                static fn(?int $value): bool => $value !== null,
+            ),
+        );
     }
 
     public function getGridView(): GridView
     {
         return $this->gridView;
+    }
+
+    private function getCurrentRequest(): Request
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request instanceof Request) {
+            throw new \RuntimeException('Grid live components require an active HTTP request.');
+        }
+
+        return $request;
     }
 }

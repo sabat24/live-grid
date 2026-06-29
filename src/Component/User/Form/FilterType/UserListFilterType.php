@@ -7,6 +7,9 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * @extends AbstractType<mixed>
+ */
 final class UserListFilterType extends AbstractType
 {
     // search everywhere https://stackoverflow.com/questions/36442829/search-for-a-keyword-through-all-the-properties-of-an-entity-symfony2

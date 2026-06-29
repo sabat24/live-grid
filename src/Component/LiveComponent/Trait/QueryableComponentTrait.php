@@ -4,12 +4,14 @@ namespace App\Component\LiveComponent\Trait;
 
 use App\Component\LiveComponent\Attribute\QueryableProp;
 use App\Component\LiveComponent\Attribute\QueryablePropContext;
+use App\Component\LiveComponent\Service\QueryableParamsBuilder;
 use Sylius\Component\Resource\Reflection\ClassReflection;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\Attribute\PostHydrate;
-use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\Twig\DeterministicTwigIdCalculator;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
@@ -25,34 +27,45 @@ trait QueryableComponentTrait
     // set to true in your component class if you are going to use two or more components on same page
     private bool $generateUniqueComponentName = false;
 
+    private QueryableParamsBuilder $queryableParamsBuilder;
+
     /**
-     * @var array{string: QueryablePropContext} $queryableFrontendPropertyNames
+     * @var array<string, QueryablePropContext>
      */
     private array $queryableFrontendPropertyNames = [];
 
+    abstract protected function getRequestStack(): RequestStack;
+
+    public function setQueryableParamsBuilder(QueryableParamsBuilder $queryableParamsBuilder): void
+    {
+        $this->queryableParamsBuilder = $queryableParamsBuilder;
+    }
+
+    /**
+     * @return \Traversable<int, QueryablePropContext>
+     */
     public static function queryableProps(object $component): \Traversable
     {
         $properties = [];
 
         foreach (self::propertiesFor($component) as $property) {
-            if (!$attribute = $property->getAttributes(QueryableProp::class)[0] ?? null) {
+            $attributes = $property->getAttributes(QueryableProp::class);
+            if ($attributes === []) {
                 continue;
             }
 
             if (\in_array($property->getName(), $properties, true)) {
-                // property name was already used
                 continue;
             }
 
             $properties[] = $property->getName();
 
-            yield new QueryablePropContext($attribute->newInstance(), $property);
+            yield new QueryablePropContext($attributes[0]->newInstance(), $property);
         }
     }
 
     /**
-     * @param object $object
-     * @return \Traversable
+     * @return \Traversable<int, \ReflectionProperty>
      */
     private static function propertiesFor(object $object): \Traversable
     {
@@ -62,13 +75,16 @@ trait QueryableComponentTrait
             yield $property;
         }
 
-        if ($parent = $class->getParentClass()) {
+        $parent = $class->getParentClass();
+        if ($parent !== false) {
             yield from self::propertiesFor($parent);
         }
     }
 
     private function initializeQueryable(): void
     {
+        $this->queryableFrontendPropertyNames = [];
+
         foreach (self::queryableProps($this) as $context) {
             $property = $context->reflectionProperty();
             $queryableProp = $context->queryableProp();
@@ -76,15 +92,16 @@ trait QueryableComponentTrait
             $frontendName = $queryableProp->calculateFieldName($this, $property->getName());
 
             if (isset($this->queryableFrontendPropertyNames[$frontendName])) {
+                $existingContext = $this->queryableFrontendPropertyNames[$frontendName];
                 $message = sprintf(
                     'The field name "%s" cannot be used by multiple QueryableProp properties in a component. Currently, both "%s" and "%s" are trying to use it in "%s".',
                     $frontendName,
-                    $this->queryableFrontendPropertyNames[$frontendName],
+                    $existingContext->reflectionProperty()->getName(),
                     $name,
-                    \get_class($component),
+                    \get_class($this),
                 );
 
-                if ($frontendName === $this->queryableFrontendPropertyNames[$frontendName] || $frontendName === $name) {
+                if ($frontendName === $existingContext->reflectionProperty()->getName() || $frontendName === $name) {
                     $message .= sprintf(
                         ' Try adding QueryableProp(fieldName="somethingElse") for the "%s" property to avoid this.',
                         $frontendName,
@@ -98,6 +115,11 @@ trait QueryableComponentTrait
         }
     }
 
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
     // we need to set priority higher than initializeForm in ComponentWithFormTrait to set initial values from query
     #[PostMount(1)]
     public function updatePropsFromRequest(array $data): array
@@ -108,9 +130,12 @@ trait QueryableComponentTrait
             $data['data-live-id'] = $this->componentName;
         }
 
-        $request = $this->requestStack->getCurrentRequest();
-        if ($request->query->has($this->componentName)) {
-            $this->updateProps($request->get($this->componentName));
+        $request = $this->getRequestStack()->getCurrentRequest();
+        if ($request instanceof Request && $request->query->has($this->componentName)) {
+            $componentParams = $request->query->all()[$this->componentName] ?? null;
+            if (is_array($componentParams)) {
+                $this->updateProps($componentParams);
+            }
         }
 
         return $data;
@@ -123,115 +148,57 @@ trait QueryableComponentTrait
         if ($this->windowQueryString !== null) {
             parse_str($this->windowQueryString, $queryParams);
 
-            if (isset($queryParams[$this->componentName])) {
+            if (isset($queryParams[$this->componentName]) && is_array($queryParams[$this->componentName])) {
                 $this->updateProps($queryParams[$this->componentName]);
             } else {
-                $this->resetPropsToDefaultValues(array_keys($this->queryableFrontendPropertyNames));
+                $this->queryableParamsBuilder->resetToDefaults(
+                    $this,
+                    array_keys($this->queryableFrontendPropertyNames),
+                    $this->queryableFrontendPropertyNames,
+                );
             }
         }
     }
 
-    private function resetPropsToDefaultValues(array $frontendPropertyNames): void
-    {
-        $propertyAccessor = new PropertyAccessor();
-        foreach ($frontendPropertyNames as $frontendPropertyName) {
-            if (!isset($this->queryableFrontendPropertyNames[$frontendPropertyName])) {
-                continue;
-            }
-
-            $queryablePropContext = $this->queryableFrontendPropertyNames[$frontendPropertyName];
-            $reflectionProperty = $queryablePropContext->reflectionProperty();
-            if (
-                $queryablePropContext->queryableProp()->isReadonly()
-                || !$reflectionProperty->hasDefaultValue()
-            ) {
-                continue;
-            }
-
-            $propertyAccessor->setValue($this, $reflectionProperty->getName(), $reflectionProperty->getDefaultValue());
-        }
-    }
-
+    /**
+     * @param array<mixed, mixed> $params
+     */
     private function updateProps(array $params): void
     {
-        if ($this->hasFormTrait()) {
-            $form = $this->getFormInstance();
-            if (isset($params[$form->getName()])) {
-                $this->formValues = $params[$form->getName()];
-                $this->submitForm();
-            }
-        }
-        $propertyAccessor = new PropertyAccessor();
-        $frontendPropertyNamesToReset = [];
-        /** @var QueryablePropContext $queryablePropContext */
-        foreach ($this->queryableFrontendPropertyNames as $frontendPropertyName => $queryablePropContext) {
-            if ($queryablePropContext->queryableProp()->isReadonly()) {
-                continue;
-            }
+        $this->applyQueryableFormParams($params);
+        $this->queryableParamsBuilder->applyParams($this, $params, $this->queryableFrontendPropertyNames);
+    }
 
-            if (!isset($params[$frontendPropertyName])) {
-                $frontendPropertyNamesToReset[] = $frontendPropertyName;
-                continue;
-            }
-
-            $propertyAccessor->setValue(
-                $this,
-                $queryablePropContext->reflectionProperty()->getName(),
-                $params[$frontendPropertyName],
-            );
-        }
-
-        $this->resetPropsToDefaultValues($frontendPropertyNamesToReset);
+    /**
+     * Override in components that use ComponentWithFormTrait to hydrate the form from query params.
+     *
+     * @param array<mixed, mixed> $params
+     */
+    protected function applyQueryableFormParams(array $params): void
+    {
     }
 
     private function updateQueryString(): void
     {
-        $params = [];
+        $formView = $this->resolveQueryableFormView();
 
-        if ($this->hasFormTrait()) {
-            $form = $this->getForm();
-            foreach (new \IteratorIterator($form) as $item) {
-                if (!empty($item->vars['value']) || $item->vars['value'] == 0) {
-                    parse_str($item->vars['full_name'] . '=' . $item->vars['value'], $queryStringParams);
-                    $params = array_merge_recursive($params, $queryStringParams);
-                }
-            }
-            $this->formView = null;
-        }
+        $this->queryString = $this->queryableParamsBuilder->buildQueryString(
+            $this->componentName,
+            $this,
+            $this->queryableFrontendPropertyNames,
+            $formView,
+        );
 
-        $propertyAccessor = new PropertyAccessor();
-
-        /** @var QueryablePropContext $queryablePropContext */
-        foreach ($this->queryableFrontendPropertyNames as $frontendPropertyName => $queryablePropContext) {
-            $property = $queryablePropContext->reflectionProperty();
-            $propertyValue = $propertyAccessor->getValue($this, $property->getName());
-            if ($property->hasDefaultValue() && $property->getDefaultValue() === $propertyValue) {
-                continue;
-            }
-
-            $params[$frontendPropertyName] = $propertyValue;
-        }
-
-        if (!empty($params)) {
-            $this->queryString = http_build_query([$this->componentName => $params]);
-        } else {
-            $this->queryString = '';
-        }
+        $this->resetQueryableFormView();
     }
 
-    private function classUsesDeep(string $class, bool $autoload = true): array
+    protected function resolveQueryableFormView(): ?FormView
     {
-        $traits = class_uses($class, $autoload);
+        return null;
+    }
 
-        if ($parent = get_parent_class($class)) {
-            $traits = array_merge($traits, $this->classUsesDeep($parent, $autoload));
-        }
-
-        foreach ($traits as $trait) {
-            $traits = array_merge($traits, $this->classUsesDeep($trait, $autoload));
-        }
-
-        return $traits;
+    protected function resetQueryableFormView(): void
+    {
     }
 
     public function generateComponentName(): string
@@ -248,14 +215,22 @@ trait QueryableComponentTrait
 
     private function getAttributeBasedComponentName(): string
     {
-        /** @var \ReflectionAttribute $attribute */
-        $attribute = current(ClassReflection::getClassAttributes(self::class, AsLiveComponent::class));
+        $attributes = ClassReflection::getClassAttributes(self::class, AsLiveComponent::class);
+        $attribute = $attributes[0] ?? null;
+        if ($attribute === null) {
+            throw new \LogicException(
+                sprintf('Live component "%s" is missing the #[AsLiveComponent] attribute.', self::class),
+            );
+        }
 
-        return $attribute->getArguments()[0];
-    }
+        $arguments = $attribute->getArguments();
+        $name = $arguments[0] ?? $arguments['name'] ?? null;
+        if (!is_string($name) || $name === '') {
+            throw new \LogicException(
+                sprintf('Live component "%s" has an invalid #[AsLiveComponent] name.', self::class),
+            );
+        }
 
-    private function hasFormTrait(): bool
-    {
-        return in_array(ComponentWithFormTrait::class, $this->classUsesDeep(self::class));
+        return $name;
     }
 }

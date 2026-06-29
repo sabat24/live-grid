@@ -20,8 +20,9 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
     use TimestampableTrait;
 
     private ?int $id = null;
-    private ?string $username;
+    private string $username = '';
     private string $email;
+    /** @var list<string> */
     private array $roles = [];
     private string $password;
     private ?string $plainPassword;
@@ -55,15 +56,20 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
         return $this->email;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
+    /**
+     * @param list<string> $roles
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -100,7 +106,7 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -113,7 +119,7 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
 
     public function setUsername(?string $username): void
     {
-        $this->username = $username;
+        $this->username = $username ?? '';
     }
 
     public function getPlainPassword(): ?string
@@ -151,7 +157,7 @@ class User implements SecurityUserInterface, PasswordAuthenticatedUserInterface,
         $this->verifiedAt = $verifiedAt;
     }
 
-    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    public static function loadValidatorMetadata(ClassMetadata $metadata): void
     {
         $metadata->addConstraint(new UniqueEntity(['fields' => 'email',], groups: ['app_user']));
         $metadata->addConstraint(new UniqueEntity(['fields' => 'username',], groups: ['app_user']));

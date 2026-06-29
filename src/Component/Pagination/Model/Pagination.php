@@ -4,6 +4,7 @@ namespace App\Component\Pagination\Model;
 
 final class Pagination
 {
+    /** @var array<string, mixed> */
     protected array $defaultOptions = [
         self::PAGE_PARAMETER_NAME => 'page',
         self::SORT_FIELD_PARAMETER_NAME => 'sort',
@@ -34,45 +35,58 @@ final class Pagination
     public const PAGE_OUT_OF_RANGE_THROW_EXCEPTION = 'throwException'; // throw PageNumberOutOfRangeException
     public const DEFAULT_LIMIT_VALUE = 10;
 
-    public function paginate(int $totalCount, int $page = 1, int $limit = null, array $options = []): SlidingPaginationView
-    {
-        $limit = $limit ?? $this->defaultOptions[self::DEFAULT_LIMIT];
-        if ($limit <= 0 or $page <= 0) {
-            throw new \LogicException("Invalid item per page number. Limit: $limit and Page: $page, must be positive non-zero integers");
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function paginate(
+        int $totalCount,
+        int $page = 1,
+        ?int $limit = null,
+        array $options = [],
+    ): SlidingPaginationView {
+        $defaultLimit = $this->defaultOptions[self::DEFAULT_LIMIT];
+        if (!is_int($defaultLimit)) {
+            throw new \LogicException(
+                sprintf('Default limit must be an integer, %s given.', get_debug_type($defaultLimit)),
+            );
         }
 
-        $offset = ($page - 1) * $limit;
+        $limit = $limit ?? $defaultLimit;
+        if ($limit <= 0 || $page <= 0) {
+            throw new \LogicException(
+                "Invalid item per page number. Limit: $limit and Page: $page, must be positive non-zero integers",
+            );
+        }
+
         $options = array_merge($this->defaultOptions, $options);
 
         // normalize default sort field
-        if (isset($options[self::DEFAULT_SORT_FIELD_NAME]) && is_array($options[self::DEFAULT_SORT_FIELD_NAME])) {
-            $options[self::DEFAULT_SORT_FIELD_NAME] = implode('+', $options[self::DEFAULT_SORT_FIELD_NAME]);
+        $defaultSortField = $options[self::DEFAULT_SORT_FIELD_NAME] ?? null;
+        if (is_array($defaultSortField)) {
+            $options[self::DEFAULT_SORT_FIELD_NAME] = implode('+', array_map(static function (mixed $part): string {
+                if (is_string($part)) {
+                    return $part;
+                }
+
+                if (is_scalar($part)) {
+                    return (string) $part;
+                }
+
+                throw new \InvalidArgumentException('Default sort field parts must be scalar values.');
+            }, $defaultSortField));
         }
 
-        /*$request = null === $this->requestStack ? Request::createFromGlobals() : $this->requestStack->getCurrentRequest();
-
-        // default sort field and direction are set based on options (if available)
-        if (isset($options[self::DEFAULT_SORT_FIELD_NAME]) && !$request->query->has($options[self::SORT_FIELD_PARAMETER_NAME])) {
-           $request->query->set($options[self::SORT_FIELD_PARAMETER_NAME], $options[self::DEFAULT_SORT_FIELD_NAME]);
-
-            if (!$request->query->has($options[self::SORT_DIRECTION_PARAMETER_NAME])) {
-                $request->query->set($options[self::SORT_DIRECTION_PARAMETER_NAME], $options[self::DEFAULT_SORT_DIRECTION] ?? 'asc');
-            }
-        }*/
-
-        if ($page > ceil($totalCount / $limit)) {
+        if ($page > (int) ceil($totalCount / $limit)) {
             $pageOutOfRangeOption = $options[self::PAGE_OUT_OF_RANGE] ?? $this->defaultOptions[self::PAGE_OUT_OF_RANGE];
             if ($pageOutOfRangeOption === self::PAGE_OUT_OF_RANGE_FIX && $totalCount > 0) {
-                // replace page number out of range with max page
-                return $this->paginate($totalCount, ceil($totalCount / $limit), $limit, $options);
+                return $this->paginate($totalCount, (int) ceil($totalCount / $limit), $limit, $options);
             }
             if ($pageOutOfRangeOption === self::PAGE_OUT_OF_RANGE_THROW_EXCEPTION) {
                 //throw new PageNumberOutOfRangeException("Page number: $page is out of range.");
             }
         }
 
-        // pagination class can be different, with different rendering methods
-        $paginationView = new SlidingPaginationView([]);
+        $paginationView = new SlidingPaginationView();
         $paginationView->setCurrentPageNumber($page);
         $paginationView->setItemNumberPerPage($limit);
         $paginationView->setTotalItemCount($totalCount);
