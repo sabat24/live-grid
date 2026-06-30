@@ -119,7 +119,7 @@ php bin/console doctrine:fixtures:load
 
 After completing the installation steps:
 
-- **Web Application**: http://localhost/en_GB/login
+- **Web Application**: http://localhost/
 - **Admin Panel**: http://localhost/admin (login with admin@live-grid.com | 111)
 - **Database**: localhost:3306
   - Database: `live-grid`

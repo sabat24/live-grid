@@ -16,7 +16,7 @@ use Sylius\Component\Grid\Definition\Grid;
 use Sylius\Component\Grid\Parameters;
 use Sylius\Component\Grid\Provider\ChainProvider;
 use Sylius\Component\Grid\View\GridView;
-use Sylius\Component\Resource\Metadata\RegistryInterface;
+use Sylius\Resource\Metadata\RegistryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
