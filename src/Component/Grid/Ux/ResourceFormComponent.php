@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
@@ -21,13 +22,14 @@ final class ResourceFormComponent extends AbstractController
 
     public function __construct(
         private readonly DenormalizerInterface $denormalizer,
+        private readonly NormalizerInterface $normalizer,
     ) {
     }
 
     #[LiveProp]
     public string $resourceClass;
 
-    #[LiveProp(hydrateWith: 'hydrate', fieldName: 'data')]
+    #[LiveProp(hydrateWith: 'hydrate', dehydrateWith: 'dehydrate', fieldName: 'data')]
     public ?ResourceInterface $resource = null;
 
     #[LiveProp]
@@ -60,6 +62,24 @@ final class ResourceFormComponent extends AbstractController
         $formType = $this->formType;
 
         return $this->createForm($formType, $this->resource);
+    }
+
+    public function dehydrate(?ResourceInterface $resource): mixed
+    {
+        if (null === $resource) {
+            return null;
+        }
+
+        try {
+            return $this->normalizer->normalize($resource, 'json');
+        } catch (ExceptionInterface $exception) {
+            throw new \LogicException(sprintf(
+                'The normalizer was used to dehydrate/normalize the "%s" property on your "%s" live component, but it failed: %s',
+                'resource',
+                \get_class($this),
+                $exception->getMessage(),
+            ), 0, $exception);
+        }
     }
 
     public function hydrate(mixed $value): ?ResourceInterface

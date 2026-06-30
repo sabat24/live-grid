@@ -1,9 +1,11 @@
 {% import 'UiBundle/Macro/action_list_items.html.twig' as items %}
 
-{% set path = options.link.url|default(path(options.link.route|default(grid.requestConfiguration.getRouteName('delete')), options.link.parameters|default({'id': data.id}))) %}
-
 <hr class="dropdown-divider" />
 
-{{ items.delete(path, action.label, action.options.label_description|default(null)) }}
+{% if is_granted('app.user.manage') %}
+    {% set path = options.link.url|default(path(options.link.route|default(grid.requestConfiguration.getRouteName('delete')), options.link.parameters|default({'id': data.id}))) %}
 
-
+    {{ items.delete(path, action.label, action.options.label_description|default(null)) }}
+{% else %}
+    {{ items.deleteDisabled(action.label, action.options.label_description|default(null)) }}
+{% endif %}

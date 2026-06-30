@@ -23,4 +23,29 @@
     {{ buttons.default(url, message, id, 'fa-plus', class) }}
 {% endmacro %}
 
+{% macro createDisabled(message, id, labeled = true, class) %}
+    {% import _self as buttons %}
+
+    {% if message is empty and labeled %}
+        {% set message = 'drako.ui.create' %}
+    {% endif %}
+
+    {% set class = class|default('') ~ ' is-primary is-raised is-disabled' %}
+
+    {{ buttons.defaultDisabled(message, id, 'fa-plus', class) }}
+{% endmacro %}
+
+{% macro defaultDisabled(message, id, icon, class) %}
+    <span class="button h-button {% if class is not empty %} {{ class }} {% endif %}" {% if id is not null %} id="{{ id }}"{% endif %} aria-disabled="true">
+        {% if icon is not empty %}
+            <span class="icon">
+                <i class="fas {{ icon }}"></i>
+            </span>
+        {% endif %}
+        {% if message is not empty %}
+            <span>{{ message|trans }}</span>
+        {% endif %}
+    </span>
+{% endmacro %}
+
 
