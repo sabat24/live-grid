@@ -10,7 +10,7 @@ final class PlaywrightInterceptSmokeE2eTest extends AbstractE2eTestCase
 {
     public function testLoginPageIsInterceptedByKernel(): void
     {
-        $this->visit('/en_GB/login');
+        $this->visit('/en/login');
         $this->assertResponseIsSuccessful();
     }
 }

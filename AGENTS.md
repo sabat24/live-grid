@@ -30,7 +30,7 @@ php bin/console doctrine:fixtures:load
 
 App URLs:
 
-- Login: http://localhost/en_GB/login
+- Login: http://localhost/en/login
 - Admin users list: http://localhost/admin/users/
 - Admin user: `admin@live-grid.com` / `111`
 

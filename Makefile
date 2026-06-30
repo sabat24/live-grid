@@ -5,7 +5,7 @@ DOCKER_COMP = docker-compose
 # Docker containers
 PHP_CONT = $(DOCKER_COMP) exec -u 1000 app
 
-E2E_DATABASE_URL = mysql://live-grid_user:live-grid_pass@db_e2e:3306/live-grid_e2e?serverVersion=mariadb-10.2.19&charset=utf8mb4
+E2E_DATABASE_URL = mysql://live-grid_user:live-grid_pass@db_e2e:3306/live-grid_e2e?serverVersion=mariadb-10.2.44&charset=utf8mb4
 
 .PHONY: deploy deploy-local up up_visible down build bash install test static migrate-test migrate-e2e playwright-install e2e e2e-suite e2e-file up-e2e
 

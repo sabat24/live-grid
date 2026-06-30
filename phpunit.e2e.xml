@@ -14,7 +14,7 @@
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
         <env name="KERNEL_CLASS" value="App\Kernel" />
-        <env name="DATABASE_URL" value="mysql://live-grid_user:live-grid_pass@db_e2e:3306/live-grid_e2e?serverVersion=mariadb-10.2.19&amp;charset=utf8mb4" force="true" />
+        <env name="DATABASE_URL" value="mysql://live-grid_user:live-grid_pass@db_e2e:3306/live-grid_e2e?serverVersion=mariadb-10.2.44&amp;charset=utf8mb4" force="true" />
     </php>
 
     <testsuites>

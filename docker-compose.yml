@@ -46,7 +46,7 @@ services:
 
     #MySQL Service (dev + unit/functional tests with DAMA)
     db:
-        image: mariadb:10.2.19
+        image: mariadb:10.2.44
         restart: unless-stopped
         tty: true
         ports:
@@ -71,7 +71,7 @@ services:
 
     #MySQL Service (Playwright E2E — no DAMA, committed writes survive reloads)
     db_e2e:
-        image: mariadb:10.2.19
+        image: mariadb:10.2.44
         restart: unless-stopped
         tty: true
         ports:
