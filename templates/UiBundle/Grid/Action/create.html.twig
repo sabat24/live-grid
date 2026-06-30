@@ -1,5 +1,9 @@
 {% import 'UiBundle/Macro/buttons.html.twig' as buttons %}
 
-{% set path = options.link.url|default(path(options.link.route|default(grid.requestConfiguration.getRouteName('create')), options.link.parameters|default([]))) %}
+{% if is_granted('app.user.manage') %}
+    {% set path = options.link.url|default(path(options.link.route|default(grid.requestConfiguration.getRouteName('create')), options.link.parameters|default([]))) %}
 
-{{ buttons.create(path, action.label, null, true, 'is-inline-block-tablet') }}
+    {{ buttons.create(path, action.label, null, true, 'is-inline-block-tablet') }}
+{% else %}
+    {{ buttons.createDisabled(action.label, null, true, 'is-inline-block-tablet') }}
+{% endif %}

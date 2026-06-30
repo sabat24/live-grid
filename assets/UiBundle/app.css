@@ -64,3 +64,11 @@
         margin-right: 0;
     }
 }
+
+/** DISABLED ACTIONS **/
+.button.h-button.is-disabled,
+.dropdown-item.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
