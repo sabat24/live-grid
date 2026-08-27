@@ -40,11 +40,11 @@ Browser back -> popstate -> queryable_controller.js
 
 | Piece     | Path                                                             | Role                                                               |
 |-----------|------------------------------------------------------------------|--------------------------------------------------------------------|
-| Attribute | `src/Component/LiveComponent/Attribute/QueryableProp.php`        | Marks properties (and optional `fieldName`) for URL sync           |
-| Builder   | `src/Component/LiveComponent/Service/QueryableParamsBuilder.php` | Build/apply query params; skip defaults and empty form values      |
-| Trait     | `src/Component/LiveComponent/Trait/QueryableComponentTrait.php`  | Mount hydration, component namespace, popstate handling, form hook |
+| Attribute | `src/Queryable/Attribute/QueryableProp.php`                      | Marks properties (and optional `fieldName`) for URL sync           |
+| Builder   | `src/Queryable/Service/QueryableParamsBuilder.php`               | Build/apply query params; skip defaults and empty form values      |
+| Trait     | `src/Queryable/LiveComponent/QueryableComponentTrait.php`        | Mount hydration, component namespace, popstate handling, form hook |
 | Stimulus  | `assets/controllers/queryable_controller.js`                     | `pushState`, `popstate`, per-component namespace merge             |
-| Example   | `src/Component/User/LiveComponent/Admin/UserListComponent.php`   | Grid list with pagination + filter form                            |
+| Example   | `src/LiveGrid/LiveComponent/LiveGridComponent.php`               | Generic live grid with pagination + filter form                    |
 | Demo page | `templates/Admin/Crud/index.html.twig`                           | Two independent lists on one page                                  |
 
 ### URL shape
@@ -66,15 +66,15 @@ Each list instance gets an auto-generated namespace (via `DeterministicTwigIdCal
 3. **Reset on missing keys** - when a param disappears from the URL (e.g. browser back), the prop resets to its PHP default.
 4. **`pushState`** - each state change creates a history entry (not `replaceState`).
 5. **`popstate`** - back/forward re-hydrates the component from `window.location.search`.
-6. **Multi-instance** - two `admin:user_list` components on one page without manual `alias` props.
+6. **Multi-instance** - two `live_grid` components on one page without manual `alias` props.
 7. **Form integration** - Symfony `FormView` fields are serialized into the component namespace (nested under the form name).
 
 ### Tests (reproducer assets)
 
 | Layer       | Test file                                         | What it proves                                             |
 |-------------|---------------------------------------------------|------------------------------------------------------------|
-| Unit        | `tests/Component/QueryableParamsBuilderTest.php`  | Default omission, form field omission/inclusion            |
-| Integration | `tests/Component/QueryableComponentTraitTest.php` | Mount hydration, popstate reset                            |
+| Unit        | `tests/Queryable/QueryableParamsBuilderTest.php`  | Default omission, form field omission/inclusion            |
+| Integration | `tests/Queryable/QueryableComponentTraitTest.php` | Mount hydration, popstate reset                            |
 | Functional  | `tests/User/AdminUserListFunctionalTest.php`      | Server-side hydration, dual-list isolation                 |
 | E2E         | `tests/E2e/Admin/UserListUrlSyncE2eTest.php`      | `pushState`, reload, dual-list merge, browser back/forward |
 

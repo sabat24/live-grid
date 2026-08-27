@@ -1,44 +1,30 @@
 # Live Grid Project
 
-Proof of concept for a live grid using Symfony UX Live Components and Sylius Grid Bundle.
+Proof of concept for a live grid using Symfony UX Live Components, with optional Sylius Grid/Resource integration via an adapter.
 
-## The Main Concept
+## Architecture
 
-I started this project in January 2023, when Live Components were still in the experimental phase. The main idea was to create reusable components that could be placed on a single page, with the ability to save their state in the URL for recall, supporting browser history and navigation via browser buttons. However, I abandoned this concept for various personal and professional reasons, so the project wasn't developed much beyond testing whether the concept would work.
+- **Queryable** (`src/Queryable/`) — URL query-param sync for any Live Component (omit defaults, multi-instance namespaces, form fields, `pushState`/`popstate`). Sylius-free.
+- **LiveGrid** (`src/LiveGrid/`) — Generic `live_grid` Live Component, ports, Twig hooks, events. Configure lists in YAML; render with any Twig templates.
+- **Sylius adapter** (`src/Adapter/Sylius/`) — Native bridge to Sylius Grid + Resource (definitions, actions, `allowed_paginate`, Doctrine QB + Spiriit filters).
 
-At that time, the QueryParams option didn't exist in Live Components, so I created my own solution. The current QueryParams option doesn't quite meet all my requirements. For example, the component's default values (including empty ones) shouldn't be sent to the URL, which would keep URLs cleaner and more user-friendly.
+### Template usage
 
-Because I started with the concept of reusable components on a single page, I didn't focus solely on lists (Grid Bundle), even though that was the core functionality. The goal was to create a more flexible system where different types of components could coexist and share state.
+```twig
+{{ component('live_grid', { name: 'admin_user' }) }}
+```
 
-I also wanted the list component to have filters, a list, and pagination built into it as a single cohesive unit. Unlike the basic template approach, where filters and the list are visually separated into two distinct blocks, I envisioned a more integrated solution.
+Config in `config/packages/live_grid.yaml`:
 
-Additionally, I wanted a nice, mobile-responsive table view, so I decided to use a separate template. However, the functionality itself is designed to be independent of the template, allowing for different visual representations of the same data.
-
-Currently, some aspects of the example component are still too strongly tied to a specific entity, as I haven't yet created a universal component configuration system. This is one of the areas that would need further development to make the components truly reusable across different entities and use cases.
-
-### How the Component Works
-
-The live grid component is implemented using a combination of PHP Live Components and JavaScript Stimulus controllers:
-
-#### Backend Implementation
-- **`src/Component/User/LiveComponent/Admin/UserListComponent.php`** - The main Live Component class that handles:
-    - Pagination state (`page`, `resultsPerPage`)
-    - Form handling for filters
-    - Grid data management using Sylius Grid Bundle
-    - Custom query string management via `QueryableComponentTrait`
-
-#### Frontend Implementation
-- **`assets/controllers/queryable_controller.js`** - Stimulus controller that manages:
-    - Browser history integration
-    - URL state synchronization
-    - Component re-rendering on browser navigation
-    - Query parameter management (adds/removes/updates URL params)
-
-#### Template Usage
-- **`templates/Admin/Crud/index.html.twig`** - Basic template showing how to use the component:
-  ```twig
-  {{ component('admin:user_list') }}
-  ```
+```yaml
+live_grid:
+  grids:
+    admin_user:
+      adapter: sylius
+      filter_form: App\Component\User\Form\FilterType\UserListFilterType
+      options:
+        grid: app_admin_user
+```
 
 ### Key Features
 
@@ -47,6 +33,7 @@ The live grid component is implemented using a combination of PHP Live Component
 3. **Clean URLs** - Default values are not included in URLs to keep them clean
 4. **Multiple Components** - Multiple instances can coexist on the same page (as shown in the template)
 5. **Form Integration** - Search filters are integrated with the component's state management
+6. **OCP / adapters** - Add grids without new PHP list classes; swap Sylius for `in_memory` or a custom adapter
 
 ### Custom Query String Management
 
@@ -55,6 +42,8 @@ The project implements a custom solution for query string management because the
 - Supports multiple component instances on the same page
 - Handles browser navigation events properly
 - Maintains component isolation while sharing URL state
+
+See [docs/live-component-url-sync.md](docs/live-component-url-sync.md).
 
 # Installation
 

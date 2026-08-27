@@ -1,6 +1,6 @@
 # Agent guide — live-grid
 
-Symfony 7.4 POC: Sylius Grid + UX Live Components with **custom URL query-param sync** (not Symfony `LiveParam url`).
+Symfony 7.4 POC: UX Live Components + custom URL query-param sync (**Queryable**), generic **LiveGrid**, and optional **Sylius Grid/Resource adapter** (not Symfony `LiveParam url`).
 
 ## Stack
 
@@ -92,20 +92,23 @@ Fixtures: 1 admin + 25 users (26 total → 3 pages at 10/page).
 
 | Piece | Path |
 |-------|------|
-| URL build/apply logic | `src/Component/LiveComponent/Service/QueryableParamsBuilder.php` |
-| Live component hook | `src/Component/LiveComponent/Trait/QueryableComponentTrait.php` |
-| List component | `src/Component/User/LiveComponent/Admin/UserListComponent.php` |
+| URL build/apply logic | `src/Queryable/Service/QueryableParamsBuilder.php` |
+| Live component hook | `src/Queryable/LiveComponent/QueryableComponentTrait.php` |
+| Generic list component | `src/LiveGrid/LiveComponent/LiveGridComponent.php` |
+| Sylius adapter | `src/Adapter/Sylius/Adapter/SyliusGridAdapter.php` |
+| Grid config | `config/packages/live_grid.yaml` |
 | Browser URL sync | `assets/controllers/queryable_controller.js` |
 | Demo page (2 lists) | `templates/Admin/Crud/index.html.twig` |
 
-Rules: omit default/empty `#[QueryableProp]` values from the query string; each list instance has its own namespace (`live-*` id when two on one page).
+Rules: omit default/empty `#[QueryableProp]` values from the query string; each list instance has its own namespace (`live-*` id when two on one page). LiveGrid is Sylius-free; Sylius Grid/Resource integrate only via the adapter (`adapter: sylius` in `live_grid.yaml`).
 
 ## Test layout
 
 | Layer | Location |
 |-------|----------|
-| Unit | `tests/Component/QueryableParamsBuilderTest.php` |
-| Trait | `tests/Component/QueryableComponentTraitTest.php` |
+| Unit | `tests/Queryable/QueryableParamsBuilderTest.php` |
+| Trait | `tests/Queryable/QueryableComponentTraitTest.php` |
+| LiveGrid (in-memory) | `tests/LiveGrid/InMemoryLiveGridTest.php` |
 | Integration | `tests/User/UserListComponentIntegrationTest.php` |
 | HTTP / Live actions | `tests/User/AdminUserListFunctionalTest.php` |
 | Playwright E2E | `tests/E2e/` |

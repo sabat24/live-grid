@@ -157,6 +157,38 @@ final class AdminUserListFunctionalTest extends AbstractWebTestCase
         self::assertCount(26, $matching->node->filter('.flex-table-item'));
     }
 
+    public function testResultsPerPageOnSecondListDoesNotAffectFirstOnReload(): void
+    {
+        $client = $this->loginAsAdmin();
+        $this->requestUsersIndex($client);
+        $components = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        self::assertCount(2, $components);
+
+        $firstName = $components[0]->componentName();
+        $secondName = $components[1]->componentName();
+        self::assertNotSame($firstName, $secondName);
+
+        // Only the second list has non-default URL state (defaults omitted for the first).
+        $client->request('GET', '/admin/users/', [
+            $secondName => ['resultsPerPage' => 50],
+        ]);
+
+        if ($client->getResponse()->isRedirect()) {
+            $client->followRedirect();
+        }
+
+        self::assertResponseIsSuccessful();
+
+        $reloaded = LiveComponentTestHelper::findLiveComponents($client->getCrawler());
+        $first = $this->findComponentByName($reloaded, $firstName);
+        $second = $this->findComponentByName($reloaded, $secondName);
+
+        self::assertSame(10, $first->intProp('resultsPerPage'));
+        self::assertSame(50, $second->intProp('resultsPerPage'));
+        self::assertCount(10, $first->node->filter('.flex-table-item'));
+        self::assertCount(26, $second->node->filter('.flex-table-item'));
+    }
+
     public function testResultsPerPageInQueryString(): void
     {
         $client = $this->loginAsAdmin();

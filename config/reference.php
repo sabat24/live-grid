@@ -1748,6 +1748,25 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *     }>,
  * }
+ * @psalm-type LiveGridConfig = array{
+ *     grids?: array<string, array{ // Default: []
+ *         adapter?: scalar|Param|null,
+ *         filter_form?: scalar|Param|null, // Default: null
+ *         template?: scalar|Param|null, // Default: null
+ *         options?: mixed, // Default: []
+ *         hooks?: array<string, array<string, array{ // Default: []
+ *             template?: scalar|Param|null,
+ *             priority?: int|Param, // Default: 0
+ *         }>>,
+ *     }>,
+ *     hooks?: array<string, array<string, array{ // Default: []
+ *         template?: scalar|Param|null,
+ *         priority?: int|Param, // Default: 0
+ *     }>>,
+ * }
+ * @psalm-type SyliusLiveGridConfig = array{
+ *     enabled?: bool|Param, // Default: true
+ * }
  * @psalm-type WhiteOctoberPagerfantaConfig = array{ // Deprecated: The "white_october_pagerfanta" configuration node is deprecated, migrate your configuration to the "babdev_pagerfanta" configuration node.
  *     exceptions_strategy?: array{
  *         out_of_range_page?: scalar|Param|null, // Default: "to_http_not_found"
@@ -1775,6 +1794,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     sylius_grid?: SyliusGridConfig,
  *     stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *     monolog?: MonologConfig,
+ *     live_grid?: LiveGridConfig,
+ *     sylius_live_grid?: SyliusLiveGridConfig,
  *     white_october_pagerfanta?: WhiteOctoberPagerfantaConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
@@ -1801,6 +1822,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *         playwright?: PlaywrightConfig,
  *         monolog?: MonologConfig,
+ *         live_grid?: LiveGridConfig,
+ *         sylius_live_grid?: SyliusLiveGridConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1822,6 +1845,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         sylius_grid?: SyliusGridConfig,
  *         stof_doctrine_extensions?: StofDoctrineExtensionsConfig,
  *         monolog?: MonologConfig,
+ *         live_grid?: LiveGridConfig,
+ *         sylius_live_grid?: SyliusLiveGridConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1846,6 +1871,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         dama_doctrine_test?: DamaDoctrineTestConfig,
  *         playwright?: PlaywrightConfig,
  *         monolog?: MonologConfig,
+ *         live_grid?: LiveGridConfig,
+ *         sylius_live_grid?: SyliusLiveGridConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

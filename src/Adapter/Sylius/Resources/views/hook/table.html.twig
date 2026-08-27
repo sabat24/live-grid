@@ -1,0 +1,18 @@
+{% import 'UiBundle/Macro/table.html.twig' as table %}
+
+{% set syliusGrid = view.definition.extra('sylius_grid_view') %}
+{% set definition = syliusGrid.definition %}
+
+<div data-loading="addClass(has-loader-active)" class="advanced-flex-table flex-table has-loader">
+    <div class="h-loader-wrapper">
+        <div class="loader is-large is-loading"></div>
+    </div>
+
+    <div class="flex-table-header">
+        {{ table.headers(syliusGrid, definition, app.request.attributes) }}
+    </div>
+
+    {% for row in this.resources %}
+        {{ table.row(syliusGrid, definition, row) }}
+    {% endfor %}
+</div>

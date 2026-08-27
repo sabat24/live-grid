@@ -26,4 +26,6 @@ return [
     DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true],
     Playwright\Symfony\PlaywrightSymfonyBundle::class => ['dev' => true, 'test' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
+    App\LiveGrid\LiveGridBundle::class => ['all' => true],
+    App\Adapter\Sylius\SyliusLiveGridAdapterBundle::class => ['all' => true],
 ];

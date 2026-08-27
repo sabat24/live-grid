@@ -1,0 +1,25 @@
+<div {{ queryable_live_attributes(attributes.defaults(stimulus_controller('content'))) }}>
+    <div class="flex-table-wrapper">
+        {{ live_grid_hook(this.hook('toolbar'), {
+            this: this,
+            form: this.hasFilterForm ? form : null,
+            view: this.view,
+            page: page,
+            resultsPerPage: resultsPerPage,
+        }) }}
+
+        {{ live_grid_hook(this.hook('body'), {
+            this: this,
+            view: this.view,
+            page: page,
+            resultsPerPage: resultsPerPage,
+        }) }}
+    </div>
+
+    {{ live_grid_hook(this.hook('footer'), {
+        this: this,
+        view: this.view,
+        page: page,
+        resultsPerPage: resultsPerPage,
+    }) }}
+</div>

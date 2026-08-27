@@ -17,7 +17,7 @@ Use the **fastest test that can assert the behaviour**.
 1. **If `assertSelectorExists` / `assertSelectorTextContains` on a `KernelBrowser` response works, use PHPUnit** — not Playwright.
 2. **Reserve Playwright for UX mechanics PHPUnit cannot see** — e.g. `history.pushState`, `popstate`, full page reload with committed URL, custom dropdown open + Live click wiring.
 3. **Do not duplicate coverage** — server hydration after reload belongs in PHPUnit; browser history glue belongs in E2E.
-4. **Component namespace naming** (`admin:user_list` vs `live-*` vs custom `data-live-id`) is a PHP mount concern only; it does not change `queryable_controller.js` behaviour. Test naming variants in PHPUnit, not with separate E2E routes.
+4. **Component namespace naming** (`live_grid` vs `live-*` vs custom `data-live-id`) is a PHP mount concern only; it does not change `queryable_controller.js` behaviour. Test naming variants in PHPUnit, not with separate E2E routes.
 
 Functional tests in [`tests/User/AdminUserListFunctionalTest.php`](../tests/User/AdminUserListFunctionalTest.php) cover server-side query-param hydration; browser history is covered by [`tests/E2e/Admin/UserListUrlSyncE2eTest.php`](../tests/E2e/Admin/UserListUrlSyncE2eTest.php).
 

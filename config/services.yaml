@@ -29,6 +29,8 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/LiveGrid/'
+            - '../src/Adapter/'
     app.menu_builder:
         class: App\Component\Menu\Builder
         arguments: [ "@knp_menu.factory" ]
@@ -54,10 +56,6 @@ services:
         tags:
             - { name: knp_menu.menu, alias: admin_mobile_sub_sidebar }
 
-    App\Component\Grid\Service\GridLiveComponentService:
-        arguments:
-            $gridProvider: '@sylius.grid.chain_provider'
-
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -65,3 +63,14 @@ services:
 when@test:
     imports:
         - { resource: services_test.yaml }
+
+    services:
+        App\Queryable\Service\QueryableParamsBuilder:
+            public: true
+            autowire: true
+        App\LiveGrid\Service\LiveGridFactory:
+            public: true
+            autowire: true
+        App\LiveGrid\Port\LiveGridConfigurationRegistryInterface:
+            alias: App\LiveGrid\Configuration\LiveGridConfigurationRegistry
+            public: true
