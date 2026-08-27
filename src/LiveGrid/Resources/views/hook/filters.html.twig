@@ -1,0 +1,13 @@
+{% if form is not null %}
+    {% form_theme form 'UiBundle/Form/gridSearchFormTheme.html.twig' %}
+    <div class="column is-four-fifths left">
+        <hr class="dropdown-divider is-hidden-tablet" />
+        {{ form_start(form, {
+            attr: {
+                'data-action': 'submit->live#action:prevent',
+                'data-live-action-param': 'search',
+            }
+        }) }}
+        {{ form_end(form) }}
+    </div>
+{% endif %}

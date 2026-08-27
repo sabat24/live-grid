@@ -1,0 +1,11 @@
+<div class="column right">
+    {{ live_grid_hook(this.hook('actions'), {
+        this: this,
+        view: view,
+        resultsPerPage: resultsPerPage,
+    }) }}
+    {{ component('live_grid:results_per_page_select', {
+        resultsPerPage: resultsPerPage,
+        resultsPerPageChoices: this.allowedPaginate
+    }) }}
+</div>

@@ -1,0 +1,8 @@
+{% set syliusGrid = view.definition.extra('sylius_grid_view') %}
+{% set definition = syliusGrid.definition %}
+
+{% if definition.actionGroups.main is defined %}
+    {% for action in definition.getEnabledActions('main') %}
+        {{ sylius_grid_render_action(syliusGrid, action, null) }}
+    {% endfor %}
+{% endif %}

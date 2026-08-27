@@ -1,0 +1,26 @@
+live_grid:
+    grids:
+        admin_user:
+            adapter: sylius
+            filter_form: App\Component\User\Form\FilterType\UserListFilterType
+            options:
+                grid: app_admin_user
+                filterable: true
+                section: admin
+            hooks:
+                toolbar:
+                    default:
+                        template: '@LiveGrid/hook/toolbar.html.twig'
+                        priority: 0
+                actions:
+                    main:
+                        template: '@SyliusLiveGrid/hook/actions.html.twig'
+                        priority: 0
+                body:
+                    table:
+                        template: '@SyliusLiveGrid/hook/table.html.twig'
+                        priority: 0
+                footer:
+                    pagination:
+                        template: '@LiveGrid/hook/pagination.html.twig'
+                        priority: 0

@@ -1,0 +1,60 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\LiveGrid\:
+        resource: '../..'
+        exclude:
+            - '../../DependencyInjection/'
+            - '../../LiveGridBundle.php'
+            - '../../Model/'
+            - '../../Event/'
+            - '../../Hook/HookDefinition.php'
+            - '../../Resources/'
+
+    App\LiveGrid\Configuration\LiveGridConfigurationRegistry:
+        calls:
+            - loadFromArray: ['%live_grid.grids%']
+
+    App\LiveGrid\Port\LiveGridConfigurationRegistryInterface: '@App\LiveGrid\Configuration\LiveGridConfigurationRegistry'
+
+    App\LiveGrid\Hook\HookRegistry:
+        calls:
+            - mergeConfig: ['%live_grid.merged_hooks%']
+
+    App\LiveGrid\Port\HookRegistryInterface: '@App\LiveGrid\Hook\HookRegistry'
+
+    App\LiveGrid\Adapter\InMemoryGridAdapter:
+        tags:
+            - { name: live_grid.adapter, priority: 0 }
+
+    App\LiveGrid\Adapter\ChainGridAdapter:
+        arguments:
+            $adapters: !tagged_iterator live_grid.adapter
+
+    App\LiveGrid\Port\GridAdapterInterface: '@App\LiveGrid\Adapter\ChainGridAdapter'
+
+    App\LiveGrid\Filter\SpiriitFilterHandler:
+        tags:
+            - { name: live_grid.filter_handler }
+
+    App\LiveGrid\Renderer\PropertyPathFieldRenderer:
+        tags:
+            - { name: live_grid.field_renderer, priority: -100 }
+
+    App\LiveGrid\Renderer\CompositeFieldRenderer:
+        arguments:
+            $renderers: !tagged_iterator live_grid.field_renderer
+
+    App\LiveGrid\Port\FieldRendererInterface: '@App\LiveGrid\Renderer\CompositeFieldRenderer'
+
+    App\LiveGrid\Renderer\CompositeActionRenderer:
+        arguments:
+            $renderers: !tagged_iterator live_grid.action_renderer
+
+    App\LiveGrid\Port\ActionRendererInterface: '@App\LiveGrid\Renderer\CompositeActionRenderer'
+
+    App\LiveGrid\Twig\LiveGridExtension:
+        tags:
+            - { name: twig.extension }

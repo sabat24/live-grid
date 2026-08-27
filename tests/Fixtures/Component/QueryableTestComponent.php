@@ -2,9 +2,9 @@
 
 namespace App\Tests\Fixtures\Component;
 
-use App\Component\LiveComponent\Attribute\QueryableProp;
-use App\Component\LiveComponent\Service\QueryableParamsBuilder;
-use App\Component\LiveComponent\Trait\QueryableComponentTrait;
+use App\Queryable\Attribute\QueryableProp;
+use App\Queryable\LiveComponent\QueryableComponentTrait;
+use App\Queryable\Service\QueryableParamsBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;

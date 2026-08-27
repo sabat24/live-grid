@@ -1,0 +1,10 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Adapter\Sylius\Adapter\SyliusGridAdapter:
+        arguments:
+            $gridProvider: '@sylius.grid.chain_provider'
+        tags:
+            - { name: live_grid.adapter, priority: 100 }

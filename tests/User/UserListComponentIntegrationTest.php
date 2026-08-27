@@ -2,11 +2,11 @@
 
 namespace App\Tests\User;
 
-use App\Component\Grid\Service\GridLiveComponentService;
-use App\Component\LiveComponent\Service\QueryableParamsBuilder;
 use App\Component\User\Entity\User;
-use App\Component\User\LiveComponent\Admin\UserListComponent;
-use App\Component\User\Repository\UserRepository;
+use App\LiveGrid\LiveComponent\LiveGridComponent;
+use App\LiveGrid\Port\LiveGridConfigurationRegistryInterface;
+use App\LiveGrid\Service\LiveGridFactory;
+use App\Queryable\Service\QueryableParamsBuilder;
 use App\Tests\ContainerTestTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -19,7 +19,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testDefaultPaginationShowsTwentySixUsersAcrossThreePages(): void
     {
-        $component = $this->createUserListComponent();
+        $component = $this->createLiveGridComponent();
 
         self::assertSame(26, $component->getResourcesCount());
         self::assertCount(10, $this->resourcesToArray($component->getResources()));
@@ -27,7 +27,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testPageTwoReturnsTenUsers(): void
     {
-        $component = $this->createUserListComponent(page: 2);
+        $component = $this->createLiveGridComponent(page: 2);
 
         self::assertSame(2, $component->page);
         self::assertCount(10, $this->resourcesToArray($component->getResources()));
@@ -35,7 +35,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testPageThreeReturnsRemainingSixUsers(): void
     {
-        $component = $this->createUserListComponent(page: 3);
+        $component = $this->createLiveGridComponent(page: 3);
 
         self::assertSame(3, $component->page);
         self::assertCount(6, $this->resourcesToArray($component->getResources()));
@@ -43,7 +43,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testEmailFilterReturnsSingleAdminUser(): void
     {
-        $component = $this->createUserListComponent(formValues: [
+        $component = $this->createLiveGridComponent(formValues: [
             'email' => 'admin@live-grid.com',
         ]);
 
@@ -54,7 +54,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testFilterFromPageThreeClampsToLastValidPage(): void
     {
-        $component = $this->createUserListComponent(
+        $component = $this->createLiveGridComponent(
             page: 3,
             formValues: [
                 'email' => 'admin@live-grid.com',
@@ -67,7 +67,7 @@ final class UserListComponentIntegrationTest extends KernelTestCase
 
     public function testQueryStringOmitsDefaultPageAfterFilter(): void
     {
-        $component = $this->createUserListComponent(formValues: [
+        $component = $this->createLiveGridComponent(formValues: [
             'email' => 'admin@live-grid.com',
         ]);
 
@@ -79,22 +79,23 @@ final class UserListComponentIntegrationTest extends KernelTestCase
     /**
      * @param array<string, mixed>|null $formValues
      */
-    private function createUserListComponent(int $page = 1, int $resultsPerPage = 10, ?array $formValues = null): UserListComponent
+    private function createLiveGridComponent(int $page = 1, int $resultsPerPage = 10, ?array $formValues = null): LiveGridComponent
     {
         $container = $this->getTestContainer();
 
         $requestStack = $container->get(RequestStack::class);
         $requestStack->push(Request::create('/admin/users/'));
 
-        $component = new UserListComponent(
-            $container->get(UserRepository::class),
+        $component = new LiveGridComponent(
+            $container->get(LiveGridFactory::class),
+            $container->get(LiveGridConfigurationRegistryInterface::class),
             $container->get(FormFactoryInterface::class),
             $requestStack,
-            $container->get(GridLiveComponentService::class),
             $container->get(QueryableParamsBuilder::class),
         );
 
         $this->disableUniqueComponentName($component);
+        $component->name = 'admin_user';
         $component->updatePropsFromRequest([]);
         $component->page = $page;
         $component->resultsPerPage = $resultsPerPage;
@@ -111,16 +112,22 @@ final class UserListComponentIntegrationTest extends KernelTestCase
     }
 
     /**
-     * @param iterable<int, User> $resources
+     * @param iterable<int, mixed> $resources
      *
      * @return list<User>
      */
     private function resourcesToArray(iterable $resources): array
     {
-        return [...$resources];
+        $result = [];
+        foreach ($resources as $resource) {
+            self::assertInstanceOf(User::class, $resource);
+            $result[] = $resource;
+        }
+
+        return $result;
     }
 
-    private function disableUniqueComponentName(UserListComponent $component): void
+    private function disableUniqueComponentName(LiveGridComponent $component): void
     {
         $reflection = new \ReflectionProperty($component, 'generateUniqueComponentName');
         $reflection->setAccessible(true);
